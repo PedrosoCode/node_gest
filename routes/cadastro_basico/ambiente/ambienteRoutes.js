@@ -1,8 +1,9 @@
 const express = require('express');
-const { cadastrarAmbiente } = require('../../../controllers/cadastro_basico/ambiente/ambienteController');
+const { cadastrarAmbiente, atualizarAmbiente } = require('../controllers/ambienteController');
 
 const router = express.Router();
 
 router.post('/ambientes', cadastrarAmbiente);
+router.put('/ambientes/:id', atualizarAmbiente);
 
 module.exports = router;

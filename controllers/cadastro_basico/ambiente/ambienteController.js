@@ -3,9 +3,7 @@ const pool = require('../../../config/db');
 const cadastrarAmbiente = async (req, res) => {
   try {
     const { nome_ambiente } = req.body;
-
     await pool.query('CALL sp_cadastro_basico_ambiente($1)', [nome_ambiente]);
-
     res.status(201).send('Ambiente cadastrado com sucesso');
   } catch (err) {
     console.error(err.message);
@@ -33,7 +31,33 @@ const atualizarAmbiente = async (req, res) => {
   }
 };
 
+const listarAmbientes = async (req, res) => {
+  try {
+    const ambientes = await pool.query('SELECT * FROM tb_ambientes');
+    res.json(ambientes.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+const listarAmbientesPorID = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const ambiente = await pool.query('SELECT * FROM tb_ambientes WHERE id = $1', [id]);
+    if (ambiente.rows.length === 0) {
+      return res.status(404).json('Ambiente não encontrado');
+    }
+    res.json(ambiente.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
 module.exports = {
   cadastrarAmbiente,
   atualizarAmbiente,
+  listarAmbientes,
+  listarAmbientesPorID,  
 };

@@ -55,9 +55,27 @@ const listarAtivoPorID = async (req, res) => {
   }
 };
 
+const deletarAtivo = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const ativoExistente = await pool.query('SELECT * FROM tb_cad_ativo_main WHERE codigo = $1', [id]);
+    if (ativoExistente.rows.length === 0) {
+      return res.status(404).json('Ativo não encontrado');
+    }
+
+    await pool.query('DELETE FROM tb_cad_ativo_main WHERE codigo = $1', [id]);
+    res.status(200).send('Ativo deletado com sucesso');
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
 module.exports = {
   cadastrarAtivo,
   atualizarAtivo,
   listarAtivos,
   listarAtivoPorID,
+  deletarAtivo,
 };

@@ -21,9 +21,9 @@ const cadastrarUsuario = async (req, res) => {
 };
 
 const loginUsuario = async (req, res) => {
-  const { usuario, senha } = req.body;
+  const { email, senha } = req.body;
   try {
-    const user = await pool.query('SELECT * FROM tb_cad_usuario WHERE usuario = $1', [usuario]);
+    const user = await pool.query('SELECT * FROM tb_cad_usuario WHERE email = $1', [email]);
 
     if (user.rows.length === 0) {
       return res.status(400).json({ message: 'Usuário não encontrado' });

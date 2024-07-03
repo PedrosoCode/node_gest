@@ -52,13 +52,24 @@ const loginUsuario = async (req, res) => {
   }
 };
 
+const obterUsuario = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const usuario = await pool.query('SELECT id, username, email FROM tb_cad_usuario WHERE id = $1', [userId]);
+    res.json(usuario.rows[0]);
+  } catch (error) {
+    res.status(500).send('Erro no servidor');
+  }
+};
+
+const verificarToken = async (req, res) => {
+  res.json({ valido: true });
+};
+
 module.exports = {
   cadastrarUsuario,
   loginUsuario,
+  obterUsuario,
+  verificarToken,
 };
 
-
-module.exports = {
-  cadastrarUsuario,
-  loginUsuario,
-};

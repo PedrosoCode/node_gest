@@ -72,10 +72,21 @@ const deletarAtivo = async (req, res) => {
   }
 };
 
+const listarTecnicos = async (req, res) => {
+  try {
+    const tecnicos = await pool.query('SELECT codigo, nome FROM tb_cad_tecnico');
+    res.json(tecnicos.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
 module.exports = {
   cadastrarAtivo,
   atualizarAtivo,
   listarAtivos,
   listarAtivoPorID,
   deletarAtivo,
+  listarTecnicos,
 };

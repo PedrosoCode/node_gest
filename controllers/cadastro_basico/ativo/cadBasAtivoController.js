@@ -82,6 +82,18 @@ const listarTecnicos = async (req, res) => {
   }
 };
 
+const buscarPrioridade = async (req, res) => {
+  try {
+    const prioridade = await pool.query('SELECT * FROM fn_buscar_prioridade()');
+    res.json(prioridade.rows);
+  } catch (err) {
+    console.error(err.message);  // Log completo do erro
+    res.status(500).send('Server Error');
+  }
+};
+
+
+
 module.exports = {
   cadastrarAtivo,
   atualizarAtivo,
@@ -89,4 +101,5 @@ module.exports = {
   listarAtivoPorID,
   deletarAtivo,
   listarTecnicos,
+  buscarPrioridade,
 };

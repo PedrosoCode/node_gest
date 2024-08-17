@@ -1,16 +1,45 @@
 const pool = require('../../../config/db');
+const decodeJWT = require('../../../utils/jwtDecode');
+
 
 const cadastrarParceiroNegocio = async (req, res) => {
   try {
-    const { nome_razao_social, is_cnpj, documento, endereco, cidade, estado, cep, telefone, email, tipo_parceiro, codigo_empresa } = req.body;
-    await pool.query('INSERT INTO tb_cad_parceiro_negocio (nome_razao_social, is_cnpj, documento, endereco, cidade, estado, cep, telefone, email, tipo_parceiro, codigo_empresa) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', 
-    [nome_razao_social, is_cnpj, documento, endereco, cidade, estado, cep, telefone, email, tipo_parceiro, codigo_empresa]);
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const decoded = decodeJWT(token);
+
+    if (!decoded) {
+      return res.status(401).send('Token inválido ou expirado');
+    }
+
+    const { nome_razao_social, is_cnpj, documento, endereco, cidade, estado, cep, telefone, email, tipo_parceiro } = req.body;
+    const codigo_empresa = decoded.codigo_empresa;
+
+    const queryParams = [
+      String(nome_razao_social),
+      Boolean(is_cnpj),
+      String(documento),
+      String(endereco),
+      String(cidade),
+      String(estado),
+      String(cep),
+      String(telefone),
+      String(email),
+      String(tipo_parceiro),
+      Number(codigo_empresa)
+    ];
+
+    await pool.query(
+      'CALL public.sp_cadastro_basico_parceiro_negocio($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)',
+      queryParams
+    );
+
     res.status(201).send('Parceiro de negócio cadastrado com sucesso');
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
+    console.error('Erro ao cadastrar parceiro de negócio:', err.message);
+    res.status(500).send('Erro no servidor');
   }
 };
+
 
 const atualizarParceiroNegocio = async (req, res) => {
   try {

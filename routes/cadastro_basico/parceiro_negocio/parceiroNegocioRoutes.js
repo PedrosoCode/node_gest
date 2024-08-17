@@ -1,5 +1,6 @@
 const express = require('express');
 const { cadastrarParceiroNegocio, atualizarParceiroNegocio, listarParceirosNegocio, listarParceiroNegocioPorID, deletarParceiroNegocio } = require('../../../controllers/cadastro_basico/parceiro_negocio/cadBasParceiroNegocioController');
+const authMiddleware = require('../../../middlewares/midAutenticar');
 
 const router = express.Router();
 

@@ -1,3 +1,4 @@
+// authRoutes.js
 const express = require('express');
 const { cadastrarUsuario, loginUsuario, obterUsuario, verificarToken, listarEmpresas } = require('../../controllers/auth/authController');
 const midAutenticar = require('../../middlewares/midAutenticar'); 

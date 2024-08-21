@@ -1,12 +1,18 @@
-// routes/cadastro_basico/parceiro_negocio/parceiroNegocioRoutes.js
 const express = require('express');
-const router = express.Router();
-const cadBasParceiroNegocioController = require('../../../controllers/cadastro_basico/parceiro_negocio/cadBasParceiroNegocioController');
+const { 
+    cadastrarParceiroNegocio, 
+    atualizarParceiroNegocio, 
+    listarParceirosNegocio, 
+    listarParceiroNegocioPorID, 
+    deletarParceiroNegocio 
+} = require('../../../controllers/cadastro_basico/parceiro_negocio/cadBasParceiroNegocioController');
 
-router.post('/parceiros', cadBasParceiroNegocioController.cadastrarParceiroNegocio);
-router.put('/parceiros/:id', cadBasParceiroNegocioController.atualizarParceiroNegocio);
-router.get('/parceiros', cadBasParceiroNegocioController.listarParceirosNegocio);
-router.get('/parceiros/:id', cadBasParceiroNegocioController.listarParceiroNegocioPorID);
-router.delete('/parceiros/:id', cadBasParceiroNegocioController.deletarParceiroNegocio);
+const router = express.Router();
+
+router.post('/parceiros', cadastrarParceiroNegocio);
+router.put('/parceiros/:id', atualizarParceiroNegocio);
+router.get('/parceiros', listarParceirosNegocio);
+router.get('/parceiros/:id', listarParceiroNegocioPorID);
+router.delete('/parceiros/:id', deletarParceiroNegocio);
 
 module.exports = router;

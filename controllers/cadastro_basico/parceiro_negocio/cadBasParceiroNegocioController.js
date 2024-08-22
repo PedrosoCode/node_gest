@@ -1,4 +1,4 @@
-const sequelize = require('../../../config/db'); // Ajuste o caminho para o arquivo de configuração do Sequelize
+const sequelize = require('../../../config/db'); 
 const decodeJWT = require('../../../utils/jwtDecode');
 
 const cadastrarParceiroNegocio = async (req, res) => {

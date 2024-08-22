@@ -4,6 +4,9 @@ const jwt = require('jsonwebtoken');
 const ModUsuario = require('../../models/ModUsuario');
 const ModEmpresa = require('../../models/ModEmpresa');
 
+//REVIEW - para padrozinar, alterar o auth de models para procedure/query, semelhante a como era feito antes do sequelize
+//FIXME - ^^^^^
+
 const cadastrarUsuario = async (req, res) => {
   const { username, email, password, codigo_empresa } = req.body;
   try {

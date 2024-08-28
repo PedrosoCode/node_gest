@@ -20,17 +20,29 @@ const cadastrarAtivo = async (req, res) => {
             nivel_manutencao } = req.body;
     const codigo_empresa = decoded.codigo_empresa;
 
-    await sequelize.query('CALL sp_cadastro_basico_ativo(:codigo_cliente, :numero_serie, :codigo_fabricante, :modelo, :codigo_prioridade, :codigo_tecnico_responsavel, :observacao, :nivel_manutencao, :codigo_empresa)', {
+    await sequelize.query(`
+      CALL sp_insert_cadastro_basico_ativo(
+        :p_codigo_cliente             ::integer, 
+        :p_numero_serie               ::character varying, 
+        :p_codigo_fabricante          ::integer, 
+        :p_modelo                     ::character varying, 
+        :p_codigo_prioridade          ::smallint, 
+        :p_codigo_tecnico_responsavel ::integer, 
+        :p_observacao                 ::character varying, 
+        :p_nivel_manutencao           ::boolean, 
+        :p_codigo_empresa             ::integer
+      )
+    `, {
       replacements: {
-        codigo_cliente, 
-        numero_serie, 
-        codigo_fabricante, 
-        modelo, 
-        codigo_prioridade, 
-        codigo_tecnico_responsavel, 
-        observacao, 
-        nivel_manutencao, 
-        codigo_empresa
+        p_codigo_cliente:             codigo_cliente, 
+        p_numero_serie:               numero_serie, 
+        p_codigo_fabricante:          codigo_fabricante, 
+        p_modelo:                     modelo, 
+        p_codigo_prioridade:          codigo_prioridade, 
+        p_codigo_tecnico_responsavel: codigo_tecnico_responsavel, 
+        p_observacao:                 observacao, 
+        p_nivel_manutencao:           nivel_manutencao, 
+        p_codigo_empresa:             codigo_empresa
       },
     });
 
@@ -64,7 +76,7 @@ const atualizarAtivo = async (req, res) => {
 
     const codigo_empresa = decoded.codigo_empresa;
 
-    const [ativoExistente] = await sequelize.query('SELECT * FROM tb_cad_ativo_main WHERE codigo = :id AND codigo_empresa = :codigo_empresa', {
+    const [ativoExistente] = await sequelize.query('SELECT * FROM tb_cad_ativo WHERE codigo = :id AND codigo_empresa = :codigo_empresa', {
       replacements: { id, codigo_empresa },
     });
 
@@ -106,7 +118,7 @@ const atualizarAtivo = async (req, res) => {
     }
   );
 
-    const [ativoAtualizado] = await sequelize.query('SELECT * FROM tb_cad_ativo_main WHERE codigo = :id AND codigo_empresa = :codigo_empresa', {
+    const [ativoAtualizado] = await sequelize.query('SELECT * FROM tb_cad_ativo WHERE codigo = :id AND codigo_empresa = :codigo_empresa', {
       replacements: { id, codigo_empresa },
     });
 
@@ -129,7 +141,7 @@ const listarAtivos = async (req, res) => {
 
     const codigo_empresa = decoded.codigo_empresa;
 
-    const [ativos] = await sequelize.query('SELECT * FROM tb_cad_ativo_main WHERE codigo_empresa = :codigo_empresa', {
+    const [ativos] = await sequelize.query('SELECT * FROM tb_cad_ativo WHERE codigo_empresa = :codigo_empresa', {
       replacements: { codigo_empresa },
     });
     res.json(ativos);
@@ -151,7 +163,7 @@ const listarAtivoPorID = async (req, res) => {
     const { id } = req.params;
     const codigo_empresa = decoded.codigo_empresa;
 
-    const [ativo] = await sequelize.query('SELECT * FROM tb_cad_ativo_main WHERE codigo = :id AND codigo_empresa = :codigo_empresa', {
+    const [ativo] = await sequelize.query('SELECT * FROM tb_cad_ativo WHERE codigo = :id AND codigo_empresa = :codigo_empresa', {
       replacements: { id, codigo_empresa },
     });
 
@@ -177,7 +189,7 @@ const deletarAtivo = async (req, res) => {
     const { id } = req.params;
     const codigo_empresa = decoded.codigo_empresa;
 
-    const [ativoExistente] = await sequelize.query('SELECT * FROM tb_cad_ativo_main WHERE codigo = :id AND codigo_empresa = :codigo_empresa', {
+    const [ativoExistente] = await sequelize.query('SELECT * FROM tb_cad_ativo WHERE codigo = :id AND codigo_empresa = :codigo_empresa', {
       replacements: { id, codigo_empresa },
     });
 
@@ -185,7 +197,7 @@ const deletarAtivo = async (req, res) => {
       return res.status(404).json('Ativo não encontrado');
     }
 
-    await sequelize.query('DELETE FROM tb_cad_ativo_main WHERE codigo = :id AND codigo_empresa = :codigo_empresa', {
+    await sequelize.query('DELETE FROM tb_cad_ativo WHERE codigo = :id AND codigo_empresa = :codigo_empresa', {
       replacements: { id, codigo_empresa },
     });
 

@@ -1,7 +1,8 @@
-require('dotenv').config();
+require('dotenv').config(); 
 const express = require('express');
 const cors = require('cors');
-const sequelize = require('./config/db'); // Importa o Sequelize
+const path = require('path'); 
+const sequelize = require('./config/db'); 
 const ambienteRoutes = require('./routes/cadastro_basico/ambiente/ambienteRoutes');
 const authRoutes = require('./routes/auth/authRoutes');
 const parceiroNegocioRoutes = require('./routes/cadastro_basico/parceiro_negocio/parceiroNegocioRoutes');
@@ -13,6 +14,9 @@ const PORT = 3042;
 // Middlewares
 app.use(cors());
 app.use(express.json());
+
+// caminho para servir arquivos estáticos
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Rotas
 app.use('/api', ambienteRoutes);

@@ -1,5 +1,8 @@
 const sequelize = require('../../../config/db');
 const decodeJWT = require('../../../utils/jwtDecode');
+const upload = require('../../../config/uploadConfig'); // Importe o middleware de upload
+const fs = require('fs');
+const path = require('path');
 
 const cadastrarAtivo = async (req, res) => {
   try {
@@ -228,6 +231,147 @@ const buscarPrioridade = async (req, res) => {
   }
 };
 
+const uploadFotos = async (req, res) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const decoded = decodeJWT(token);
+
+    if (!decoded) {
+      return res.status(401).send('Token inválido ou expirado');
+    }
+
+    const { id } = req.params; // ID do ativo, agora tratado como codigo_ativo
+    const codigo_empresa = decoded.codigo_empresa;
+
+    // Verificar se o ativo existe
+    const [ativoExistente] = await sequelize.query(`
+      SELECT * FROM tb_cad_ativo WHERE codigo = :id AND codigo_empresa = :codigo_empresa
+    `, {
+      replacements: { id, codigo_empresa },
+    });
+
+    if (ativoExistente.length === 0) {
+      return res.status(404).send('Ativo não encontrado para upload de fotos');
+    }
+
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).send('Nenhuma foto enviada');
+    }
+
+    for (let file of req.files) {
+      const caminhoCompleto = path.resolve('uploads', file.filename);
+
+      await sequelize.query(`
+        CALL sp_insert_cadastro_basico_ativo_foto(
+          :p_codigo_ativo                ::integer,
+          :p_codigo_empresa              ::integer,
+          :p_titulo                      ::character varying,
+          :p_caminho_completo            ::character varying,
+          :p_descricao                   ::character varying
+        )
+      `, {
+        replacements: {
+          p_codigo_ativo: id, // ID do ativo
+          p_codigo_empresa: codigo_empresa,
+          p_titulo: file.originalname,
+          p_caminho_completo: caminhoCompleto,
+          p_descricao: null // ou forneça uma descrição adequada
+        }
+      });
+    }
+
+    res.status(200).send('Fotos enviadas com sucesso');
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Erro ao fazer upload das fotos');
+  }
+};
+
+//FIXME - Delete ainda não funciona
+const deletarFoto = async (req, res) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const decoded = decodeJWT(token);
+
+    if (!decoded) {
+      return res.status(401).send('Token inválido ou expirado');
+    }
+
+    const { id, fotoId } = req.params; // id do ativo e id da foto
+    const codigo_empresa = decoded.codigo_empresa;
+
+    const [foto] = await sequelize.query(`
+      SELECT * FROM tb_cad_ativo_foto WHERE codigo = :id AND codigo_empresa = :codigo_empresa AND id = :fotoId
+    `, {
+      replacements: { id, codigo_empresa, fotoId },
+    });
+
+    if (foto.length === 0) {
+      return res.status(404).json('Foto não encontrada');
+    }
+
+    const caminhoCompleto = foto[0].caminho_completo;
+
+    // Remova o arquivo do sistema de arquivos
+    fs.unlinkSync(caminhoCompleto);
+
+    // Remova a entrada do banco de dados
+    await sequelize.query(`
+      DELETE FROM tb_cad_ativo_foto WHERE codigo = :id AND codigo_empresa = :codigo_empresa AND id = :fotoId
+    `, {
+      replacements: { id, codigo_empresa, fotoId },
+    });
+
+    res.status(200).send('Foto deletada com sucesso');
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Erro ao deletar a foto');
+  }
+};
+
+const listarFotosAtivo = async (req, res) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const decoded = decodeJWT(token);
+
+    if (!decoded) {
+      return res.status(401).send('Token inválido ou expirado');
+    }
+
+    const { id } = req.params;
+    const codigo_empresa = decoded.codigo_empresa;
+
+    const fotos = await sequelize.query(`
+      SELECT * FROM fn_listar_fotos_ativo(
+        :p_codigo_ativo::integer, 
+        :p_codigo_empresa::integer
+      )
+    `, {
+      replacements: { 
+        p_codigo_ativo: id, 
+        p_codigo_empresa: codigo_empresa 
+      },
+      type: sequelize.QueryTypes.SELECT
+    });
+
+    console.log('Retorno da consulta fotos:', fotos);
+
+    // Garante que o retorno seja tratado como um array
+    const fotosArray = Array.isArray(fotos) ? fotos : [fotos];
+
+    // Ajuste o caminho para cada foto para ser relativo à pasta de uploads
+    const fotosComPath = fotosArray.map(foto => ({
+      ...foto,
+      caminho_completo: `/uploads/${foto.caminho_completo.split('/').pop()}`
+    }));
+
+    res.json(fotosComPath);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Erro ao buscar fotos');
+  }
+};
+
 module.exports = {
   cadastrarAtivo,
   atualizarAtivo,
@@ -236,4 +380,7 @@ module.exports = {
   deletarAtivo,
   listarTecnicos,
   buscarPrioridade,
+  uploadFotos,
+  deletarFoto,
+  listarFotosAtivo,
 };

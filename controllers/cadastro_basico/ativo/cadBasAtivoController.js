@@ -4,6 +4,15 @@ const upload = require('../../../config/uploadConfig'); // Importe o middleware 
 const fs = require('fs');
 const path = require('path');
 
+const tratarNomeArquivo = (nomeOriginal) => {
+  const timestamp = Date.now();
+  const nomeTratado = nomeOriginal
+    .toLowerCase()
+    .replace(/\s+/g, '-') // Substitui espaços por hífens
+    .replace(/[^a-z0-9.-]/g, ''); // Remove caracteres especiais
+  return `${timestamp}-${nomeTratado}`;
+};
+
 const cadastrarAtivo = async (req, res) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
@@ -259,7 +268,11 @@ const uploadFotos = async (req, res) => {
     }
 
     for (let file of req.files) {
-      const caminhoCompleto = path.resolve('uploads', file.filename);
+      const nomeTratado = tratarNomeArquivo(file.originalname);
+      const caminhoCompleto = path.resolve('uploads', nomeTratado);
+
+      // Mova o arquivo para o novo nome tratado
+      fs.renameSync(file.path, caminhoCompleto);
 
       await sequelize.query(`
         CALL sp_insert_cadastro_basico_ativo_foto(
@@ -300,10 +313,12 @@ const deletarFoto = async (req, res) => {
     const { id, fotoId } = req.params; // id do ativo e id da foto
     const codigo_empresa = decoded.codigo_empresa;
 
+    // Primeiro, obtenha o caminho completo do arquivo a ser deletado
     const [foto] = await sequelize.query(`
-      SELECT * FROM tb_cad_ativo_foto WHERE codigo = :id AND codigo_empresa = :codigo_empresa AND id = :fotoId
+      SELECT caminho_completo FROM tb_cad_ativo_foto 
+      WHERE codigo = :p_codigo_foto AND codigo_empresa = :p_codigo_empresa
     `, {
-      replacements: { id, codigo_empresa, fotoId },
+      replacements: { p_codigo_foto: fotoId, p_codigo_empresa: codigo_empresa },
     });
 
     if (foto.length === 0) {
@@ -312,15 +327,20 @@ const deletarFoto = async (req, res) => {
 
     const caminhoCompleto = foto[0].caminho_completo;
 
-    // Remova o arquivo do sistema de arquivos
-    fs.unlinkSync(caminhoCompleto);
-
-    // Remova a entrada do banco de dados
+    // Chame a procedure para deletar a foto do banco de dados
     await sequelize.query(`
-      DELETE FROM tb_cad_ativo_foto WHERE codigo = :id AND codigo_empresa = :codigo_empresa AND id = :fotoId
+      CALL sp_delete_cadastro_basico_ativo(:p_codigo_foto::integer, :p_codigo_empresa::integer)
     `, {
-      replacements: { id, codigo_empresa, fotoId },
+      replacements: {
+        p_codigo_foto: fotoId,
+        p_codigo_empresa: codigo_empresa
+      },
     });
+
+    // Remova o arquivo do sistema de arquivos
+    if (fs.existsSync(caminhoCompleto)) {
+      fs.unlinkSync(caminhoCompleto);
+    }
 
     res.status(200).send('Foto deletada com sucesso');
   } catch (err) {

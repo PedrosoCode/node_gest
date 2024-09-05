@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 14.12 (Ubuntu 14.12-0ubuntu0.22.04.1)
--- Dumped by pg_dump version 14.12 (Ubuntu 14.12-0ubuntu0.22.04.1)
+-- Dumped from database version 14.13 (Ubuntu 14.13-0ubuntu0.22.04.1)
+-- Dumped by pg_dump version 14.13 (Ubuntu 14.13-0ubuntu0.22.04.1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -232,6 +232,31 @@ $$;
 ALTER PROCEDURE public.sp_insert_cadastro_basico_ativo_foto(IN p_codigo_ativo integer, IN p_codigo_empresa integer, IN p_titulo character varying, IN p_caminho_completo character varying, IN p_descricao character varying) OWNER TO postgres;
 
 --
+-- Name: sp_insert_cadastro_basico_item_estoque(character varying, numeric, numeric, integer); Type: PROCEDURE; Schema: public; Owner: postgres
+--
+
+CREATE PROCEDURE public.sp_insert_cadastro_basico_item_estoque(IN p_nome_item character varying, IN p_preco_base_venda numeric, IN p_custo numeric, IN p_codigo_empresa integer)
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    v_codigo INTEGER;  -- Declarando v_codigo como INTEGER
+BEGIN
+  -- Obter o próximo valor de código para o item, dentro do contexto da empresa
+  SELECT COALESCE(MAX(codigo), 0) + 1 INTO v_codigo
+  FROM tb_cad_item
+  WHERE codigo_empresa = p_codigo_empresa;
+
+  -- Inserir o novo item de estoque
+  INSERT INTO tb_cad_item (codigo, nome_item, preco_base_venda, custo, codigo_empresa, data_input)
+  VALUES (v_codigo, p_nome_item, p_preco_base_venda, p_custo, p_codigo_empresa, NOW());
+
+END;
+$$;
+
+
+ALTER PROCEDURE public.sp_insert_cadastro_basico_item_estoque(IN p_nome_item character varying, IN p_preco_base_venda numeric, IN p_custo numeric, IN p_codigo_empresa integer) OWNER TO postgres;
+
+--
 -- Name: sp_insert_cadastro_basico_parceiro_negocio(character varying, boolean, character varying, character varying, character varying, character varying, character varying, character varying, character varying, character varying, integer); Type: PROCEDURE; Schema: public; Owner: postgres
 --
 
@@ -449,6 +474,44 @@ CREATE TABLE public.tb_cad_ativo_foto (
 ALTER TABLE public.tb_cad_ativo_foto OWNER TO postgres;
 
 --
+-- Name: tb_cad_item; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tb_cad_item (
+    codigo integer NOT NULL,
+    nome_item character varying(255) NOT NULL,
+    preco_base_venda numeric(10,2) NOT NULL,
+    custo numeric(10,2) NOT NULL,
+    codigo_empresa integer NOT NULL,
+    data_input timestamp without time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.tb_cad_item OWNER TO postgres;
+
+--
+-- Name: tb_cad_item_codigo_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.tb_cad_item_codigo_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.tb_cad_item_codigo_seq OWNER TO postgres;
+
+--
+-- Name: tb_cad_item_codigo_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.tb_cad_item_codigo_seq OWNED BY public.tb_cad_item.codigo;
+
+
+--
 -- Name: tb_cad_parceiro_negocio; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -622,6 +685,13 @@ ALTER TABLE ONLY public.tb_ambientes ALTER COLUMN id SET DEFAULT nextval('public
 
 
 --
+-- Name: tb_cad_item codigo; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_cad_item ALTER COLUMN codigo SET DEFAULT nextval('public.tb_cad_item_codigo_seq'::regclass);
+
+
+--
 -- Name: tb_cad_parceiro_negocio codigo; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -658,6 +728,14 @@ ALTER TABLE ONLY public.tb_cad_ativo_foto
 
 
 --
+-- Name: tb_info_empresa pk_tb_info_empresa; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_info_empresa
+    ADD CONSTRAINT pk_tb_info_empresa PRIMARY KEY (codigo);
+
+
+--
 -- Name: tb_ambientes tb_ambientes_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -671,6 +749,14 @@ ALTER TABLE ONLY public.tb_ambientes
 
 ALTER TABLE ONLY public.tb_cad_ativo
     ADD CONSTRAINT tb_cad_ativo_pkey PRIMARY KEY (codigo, codigo_empresa);
+
+
+--
+-- Name: tb_cad_item tb_cad_item_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_cad_item
+    ADD CONSTRAINT tb_cad_item_pkey PRIMARY KEY (codigo, codigo_empresa);
 
 
 --
@@ -742,6 +828,14 @@ ALTER TABLE ONLY public.tb_cad_ativo_foto
 
 ALTER TABLE ONLY public.tb_cad_ativo
     ADD CONSTRAINT fk_tb_cad_ativo_main_tb_stc_nivel_prioridade FOREIGN KEY (codigo_prioridade) REFERENCES public.tb_stc_nivel_prioridade(codigo);
+
+
+--
+-- Name: tb_cad_item tb_cad_item_codigo_empresa_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_cad_item
+    ADD CONSTRAINT tb_cad_item_codigo_empresa_fkey FOREIGN KEY (codigo_empresa) REFERENCES public.tb_info_empresa(codigo);
 
 
 --

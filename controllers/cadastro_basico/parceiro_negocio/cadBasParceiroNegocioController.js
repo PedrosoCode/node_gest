@@ -24,24 +24,35 @@ const cadastrarParceiroNegocio = async (req, res) => {
     } = req.body;
     const codigo_empresa = decoded.codigo_empresa;
 
-    await sequelize.query(
-      'CALL sp_cadastro_basico_parceiro_negocio(:nome_razao_social, :is_cnpj, :documento, :endereco, :cidade, :estado, :cep, :telefone, :email, :tipo_parceiro, :codigo_empresa)',
-      {
-        replacements: {
-          nome_razao_social,
-          is_cnpj,
-          documento,
-          endereco,
-          cidade,
-          estado,
-          cep,
-          telefone,
-          email,
-          tipo_parceiro,
-          codigo_empresa,
-        },
+    await sequelize.query(`
+      CALL sp_insert_cadastro_basico_parceiro_negocio(
+        :p_nome_razao_social           ::character varying,
+        :p_is_cnpj                     ::boolean,
+        :p_documento                   ::character varying,
+        :p_endereco                    ::character varying,
+        :p_cidade                      ::character varying,
+        :p_estado                      ::character varying,
+        :p_cep                         ::character varying,
+        :p_telefone                    ::character varying,
+        :p_email                       ::character varying,
+        :p_tipo_parceiro               ::character varying,
+        :p_codigo_empresa              ::integer
+      )
+    `, {
+      replacements: {
+        p_nome_razao_social: nome_razao_social,
+        p_is_cnpj: is_cnpj,
+        p_documento: documento,
+        p_endereco: endereco,
+        p_cidade: cidade,
+        p_estado: estado,
+        p_cep: cep,
+        p_telefone: telefone,
+        p_email: email,
+        p_tipo_parceiro: tipo_parceiro,
+        p_codigo_empresa: codigo_empresa,
       }
-    );
+    });
 
     res.status(201).send('Parceiro de negócio cadastrado com sucesso');
   } catch (err) {
@@ -96,10 +107,29 @@ const atualizarParceiroNegocio = async (req, res) => {
 
 const listarParceirosNegocio = async (req, res) => {
   try {
-    const [parceiros] = await sequelize.query('SELECT * FROM tb_cad_parceiro_negocio');
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const decoded = decodeJWT(token);
+
+    if (!decoded) {
+      return res.status(401).send('Token inválido ou expirado');
+    }
+
+    const codigo_empresa = decoded.codigo_empresa;
+
+    const [parceiros] = await sequelize.query(`
+      SELECT * 
+      FROM tb_cad_parceiro_negocio 
+      WHERE codigo_empresa = :p_codigo_empresa
+    `, {
+      replacements: {
+        p_codigo_empresa: codigo_empresa
+      }
+    });
+
     res.json(parceiros);
+
   } catch (err) {
-    console.error(err.message);
+    console.error('Erro ao listar parceiros de negócio:', err.message);
     res.status(500).send('Erro no servidor');
   }
 };

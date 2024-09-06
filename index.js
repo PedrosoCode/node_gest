@@ -9,6 +9,8 @@ const parceiroNegocioRoutes = require('./routes/cadastro_basico/parceiro_negocio
 const cadBasAtivoRoutes = require('./routes/cadastro_basico/ativo/cadBasAtivoRouter');
 const cadBasItemRoutes = require('./routes/cadastro_basico/item/cadBasItemRouter');
 
+const ordemServicoRoutes = require('./routes/ordem_servico/ordemServicoRoutes');
+
 const app = express();
 const PORT = 3042;
 
@@ -25,6 +27,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api', parceiroNegocioRoutes);
 app.use('/api', cadBasAtivoRoutes);
 app.use('/api', cadBasItemRoutes);
+app.use('/api', ordemServicoRoutes);
 
 // Sincroniza o Sequelize com o banco de dados
 sequelize.sync({ force: false }).then(() => {

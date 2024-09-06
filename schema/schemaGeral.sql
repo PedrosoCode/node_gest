@@ -32,6 +32,25 @@ $$;
 ALTER FUNCTION public.fn_buscar_prioridade() OWNER TO postgres;
 
 --
+-- Name: fn_listar_ativos(integer, integer); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.fn_listar_ativos(p_codigo_empresa integer, p_codigo_cliente integer) RETURNS TABLE(codigo integer, codigo_cliente integer, numero_serie character varying, codigo_fabricante integer, modelo character varying, codigo_prioridade smallint, codigo_tecnico_responsavel integer, observacao character varying, data_input date, nivel_manutencao boolean, codigo_empresa integer)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    RETURN QUERY
+    SELECT *
+    FROM tb_cad_ativo
+    WHERE tb_cad_ativo.codigo_empresa = p_codigo_empresa
+      AND tb_cad_ativo.codigo_cliente = p_codigo_cliente;
+END;
+$$;
+
+
+ALTER FUNCTION public.fn_listar_ativos(p_codigo_empresa integer, p_codigo_cliente integer) OWNER TO postgres;
+
+--
 -- Name: fn_listar_fotos_ativo(integer, integer); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -644,6 +663,37 @@ CREATE TABLE public.tb_info_empresa (
 ALTER TABLE public.tb_info_empresa OWNER TO postgres;
 
 --
+-- Name: tb_manutencao_ordem_servico; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tb_manutencao_ordem_servico (
+    codigo integer NOT NULL,
+    codigo_empresa integer NOT NULL,
+    codigo_parceiro_negocio integer,
+    codigo_ativo integer,
+    observacao character varying
+);
+
+
+ALTER TABLE public.tb_manutencao_ordem_servico OWNER TO postgres;
+
+--
+-- Name: tb_manutencao_ordem_servico_item; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tb_manutencao_ordem_servico_item (
+    codigo integer NOT NULL,
+    codigo_empresa integer NOT NULL,
+    codigo_ordem_servico integer,
+    codigo_item integer,
+    quantidade double precision,
+    valor_unitario double precision
+);
+
+
+ALTER TABLE public.tb_manutencao_ordem_servico_item OWNER TO postgres;
+
+--
 -- Name: tb_stc_nivel_prioridade; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -789,6 +839,22 @@ ALTER TABLE ONLY public.tb_cad_usuario
 
 ALTER TABLE ONLY public.tb_cad_usuario
     ADD CONSTRAINT tb_cad_usuario_pkey PRIMARY KEY (codigo);
+
+
+--
+-- Name: tb_manutencao_ordem_servico_item tb_manutencao_ordem_servico_item_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_manutencao_ordem_servico_item
+    ADD CONSTRAINT tb_manutencao_ordem_servico_item_pkey PRIMARY KEY (codigo, codigo_empresa);
+
+
+--
+-- Name: tb_manutencao_ordem_servico tb_manutencao_ordem_servico_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_manutencao_ordem_servico
+    ADD CONSTRAINT tb_manutencao_ordem_servico_pkey PRIMARY KEY (codigo, codigo_empresa);
 
 
 --

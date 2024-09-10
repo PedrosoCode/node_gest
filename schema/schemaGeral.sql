@@ -76,6 +76,30 @@ $$;
 ALTER FUNCTION public.fn_listar_fotos_ativo(p_codigo_ativo integer, p_codigo_empresa integer) OWNER TO postgres;
 
 --
+-- Name: fn_listar_itens(integer); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.fn_listar_itens(p_codigo_empresa integer) RETURNS TABLE(codigo integer, nome_item character varying, preco_base_venda numeric, codigo_empresa integer)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    public.tb_cad_item.codigo,
+    public.tb_cad_item.nome_item,
+    public.tb_cad_item.preco_base_venda,
+    public.tb_cad_item.codigo_empresa
+  FROM 
+    public.tb_cad_item
+  WHERE 
+    public.tb_cad_item.codigo_empresa = p_codigo_empresa;
+END;
+$$;
+
+
+ALTER FUNCTION public.fn_listar_itens(p_codigo_empresa integer) OWNER TO postgres;
+
+--
 -- Name: sp_atualizar_parceiro_negocio(integer, character varying, boolean, character varying, character varying, character varying, character varying, character varying, character varying, character varying, character varying, integer); Type: PROCEDURE; Schema: public; Owner: postgres
 --
 

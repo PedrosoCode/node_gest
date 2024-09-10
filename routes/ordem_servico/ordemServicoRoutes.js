@@ -5,6 +5,6 @@ const {
 
 const router = express.Router();
 
-router.get('/ativos/:codigo_cliente', listaAtivoPorCliente);
+router.get('/ordem-servico/ativos/:codigo_cliente', listaAtivoPorCliente);
 
 module.exports = router;

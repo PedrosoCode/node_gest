@@ -1,5 +1,5 @@
-const sequelize = require('../../config/db');
-const jwtDecode = require('../../utils/jwtDecode'); 
+const sequelize = require('../../config/db'); 
+const decodeJWT = require('../../utils/jwtDecode');
 
 const listaAtivoPorCliente = async (req, res) => {
   try {
@@ -45,7 +45,7 @@ const listaAtivoPorCliente = async (req, res) => {
 const listarItens = async (req, res) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
-    const decoded = jwtDecode(token);
+    const decoded = decodeJWT(token);
 
     if (!decoded) {
       return res.status(401).send('Token inválido ou expirado');

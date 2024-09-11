@@ -14,6 +14,8 @@ const ordemServicoRoutes = require('./routes/ordem_servico/ordemServicoRoutes');
 const app = express();
 const PORT = 3042;
 
+//TODO - Elaborar um módulo genérico para reutilização de código, eventualmente levar a função do modal de itens para lá
+
 // Middlewares
 app.use(cors());
 app.use(express.json());

@@ -326,6 +326,47 @@ $$;
 ALTER PROCEDURE public.sp_insert_cadastro_basico_parceiro_negocio(IN nome_razao_social character varying, IN is_cnpj boolean, IN documento character varying, IN endereco character varying, IN cidade character varying, IN estado character varying, IN cep character varying, IN telefone character varying, IN email character varying, IN tipo_parceiro character varying, IN p_codigo_empresa integer) OWNER TO postgres;
 
 --
+-- Name: sp_ordem_servico_insert_os(integer, integer, bigint, text, date, date, bigint); Type: PROCEDURE; Schema: public; Owner: postgres
+--
+
+CREATE PROCEDURE public.sp_ordem_servico_insert_os(IN p_codigo_empresa integer, IN p_codigo_parceiro_negocio integer, IN p_codigo_ativo bigint, IN p_observacao text, IN p_data_criacao date, IN p_data_ultima_alteracao date, IN p_codigo_usuario_ultima_alteracao bigint DEFAULT NULL::bigint)
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    v_codigo integer;
+BEGIN
+	
+    SELECT 
+		COALESCE(MAX(codigo), 0) + 1 INTO v_codigo 
+	FROM tb_manutencao_ordem_servico 
+	WHERE codigo_empresa = p_codigo_empresa;
+
+    INSERT INTO tb_manutencao_ordem_servico (			 			
+		codigo_empresa, 		      			
+		codigo_parceiro_negocio,				
+		codigo_ativo,			  			
+		observacao, 			      			
+		data_criacao,						
+		data_ultima_alteracao,				
+		codigo_usuario_ultima_alteracao,
+		codigo
+    ) VALUES (
+        p_codigo_empresa,
+        p_codigo_parceiro_negocio,
+        p_codigo_ativo,
+        p_observacao,
+        CURRENT_DATE,
+        CURRENT_DATE,
+		p_codigo_usuario,
+		v_codigo
+    );
+END;
+$$;
+
+
+ALTER PROCEDURE public.sp_ordem_servico_insert_os(IN p_codigo_empresa integer, IN p_codigo_parceiro_negocio integer, IN p_codigo_ativo bigint, IN p_observacao text, IN p_data_criacao date, IN p_data_ultima_alteracao date, IN p_codigo_usuario_ultima_alteracao bigint) OWNER TO postgres;
+
+--
 -- Name: sp_update_cadastro_basico_ambiente(integer, character varying); Type: PROCEDURE; Schema: public; Owner: postgres
 --
 
@@ -695,7 +736,10 @@ CREATE TABLE public.tb_manutencao_ordem_servico (
     codigo_empresa integer NOT NULL,
     codigo_parceiro_negocio integer,
     codigo_ativo integer,
-    observacao character varying
+    observacao character varying,
+    data_criacao date,
+    data_ultima_alteracao date,
+    codigo_usuario_ultima_alteracao bigint
 );
 
 

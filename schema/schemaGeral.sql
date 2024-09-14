@@ -329,36 +329,36 @@ ALTER PROCEDURE public.sp_insert_cadastro_basico_parceiro_negocio(IN nome_razao_
 -- Name: sp_ordem_servico_insert_os(integer, integer, bigint, text, date, date, bigint); Type: PROCEDURE; Schema: public; Owner: postgres
 --
 
-CREATE PROCEDURE public.sp_ordem_servico_insert_os(IN p_codigo_empresa integer, IN p_codigo_parceiro_negocio integer, IN p_codigo_ativo bigint, IN p_observacao text, IN p_data_criacao date, IN p_data_ultima_alteracao date, IN p_codigo_usuario_ultima_alteracao bigint DEFAULT NULL::bigint)
+CREATE PROCEDURE public.sp_ordem_servico_insert_os(IN p_codigo_empresa integer, IN p_codigo_parceiro_negocio integer, IN p_codigo_ativo bigint, IN p_observacao text, IN p_data_criacao date, IN p_data_ultima_alteracao date, IN p_codigo_usuario_ultima_alteracao bigint)
     LANGUAGE plpgsql
     AS $$
 DECLARE
     v_codigo integer;
 BEGIN
-	
-    SELECT 
-		COALESCE(MAX(codigo), 0) + 1 INTO v_codigo 
-	FROM tb_manutencao_ordem_servico 
-	WHERE codigo_empresa = p_codigo_empresa;
+    -- Gera o próximo código da OS
+    SELECT COALESCE(MAX(codigo), 0) + 1 INTO v_codigo 
+    FROM tb_manutencao_ordem_servico 
+    WHERE codigo_empresa = p_codigo_empresa;
 
+    -- Insere a nova OS na tabela
     INSERT INTO tb_manutencao_ordem_servico (			 			
-		codigo_empresa, 		      			
-		codigo_parceiro_negocio,				
-		codigo_ativo,			  			
-		observacao, 			      			
-		data_criacao,						
-		data_ultima_alteracao,				
-		codigo_usuario_ultima_alteracao,
-		codigo
+        codigo_empresa, 		      			
+        codigo_parceiro_negocio,				
+        codigo_ativo,			  			
+        observacao, 			      			
+        data_criacao,						
+        data_ultima_alteracao,				
+        codigo_usuario_ultima_alteracao,
+        codigo
     ) VALUES (
         p_codigo_empresa,
         p_codigo_parceiro_negocio,
         p_codigo_ativo,
         p_observacao,
-        CURRENT_DATE,
-        CURRENT_DATE,
-		p_codigo_usuario,
-		v_codigo
+        p_data_criacao,
+        p_data_ultima_alteracao,
+        p_codigo_usuario_ultima_alteracao,  -- Corrigido aqui
+        v_codigo
     );
 END;
 $$;

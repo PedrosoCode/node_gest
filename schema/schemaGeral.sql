@@ -326,10 +326,10 @@ $$;
 ALTER PROCEDURE public.sp_insert_cadastro_basico_parceiro_negocio(IN nome_razao_social character varying, IN is_cnpj boolean, IN documento character varying, IN endereco character varying, IN cidade character varying, IN estado character varying, IN cep character varying, IN telefone character varying, IN email character varying, IN tipo_parceiro character varying, IN p_codigo_empresa integer) OWNER TO postgres;
 
 --
--- Name: sp_ordem_servico_insert_os(integer, integer, bigint, text, date, date, bigint); Type: PROCEDURE; Schema: public; Owner: postgres
+-- Name: sp_ordem_servico_insert_os(integer, integer, bigint, text, date, date, bigint); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
-CREATE PROCEDURE public.sp_ordem_servico_insert_os(IN p_codigo_empresa integer, IN p_codigo_parceiro_negocio integer, IN p_codigo_ativo bigint, IN p_observacao text, IN p_data_criacao date, IN p_data_ultima_alteracao date, IN p_codigo_usuario_ultima_alteracao bigint)
+CREATE FUNCTION public.sp_ordem_servico_insert_os(p_codigo_empresa integer, p_codigo_parceiro_negocio integer, p_codigo_ativo bigint, p_observacao text, p_data_criacao date, p_data_ultima_alteracao date, p_codigo_usuario_ultima_alteracao bigint) RETURNS integer
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -357,14 +357,60 @@ BEGIN
         p_observacao,
         p_data_criacao,
         p_data_ultima_alteracao,
-        p_codigo_usuario_ultima_alteracao,  -- Corrigido aqui
+        p_codigo_usuario_ultima_alteracao,  
         v_codigo
     );
+    
+    -- Retorna o código da ordem de serviço criada
+    RETURN v_codigo;
 END;
 $$;
 
 
-ALTER PROCEDURE public.sp_ordem_servico_insert_os(IN p_codigo_empresa integer, IN p_codigo_parceiro_negocio integer, IN p_codigo_ativo bigint, IN p_observacao text, IN p_data_criacao date, IN p_data_ultima_alteracao date, IN p_codigo_usuario_ultima_alteracao bigint) OWNER TO postgres;
+ALTER FUNCTION public.sp_ordem_servico_insert_os(p_codigo_empresa integer, p_codigo_parceiro_negocio integer, p_codigo_ativo bigint, p_observacao text, p_data_criacao date, p_data_ultima_alteracao date, p_codigo_usuario_ultima_alteracao bigint) OWNER TO postgres;
+
+--
+-- Name: sp_ordem_servico_insert_os_item_criacao(integer, bigint, bigint, numeric, numeric, date, bigint); Type: PROCEDURE; Schema: public; Owner: postgres
+--
+
+CREATE PROCEDURE public.sp_ordem_servico_insert_os_item_criacao(IN p_codigo_empresa integer, IN p_codigo_os bigint, IN p_codigo_item bigint, IN p_valor numeric, IN p_quantidade numeric, IN p_data_ultima_alteracao date, IN p_codigo_usuario_ultima_alteracao bigint)
+    LANGUAGE plpgsql
+    AS $$
+	DECLARE
+    v_codigo integer;
+BEGIN
+    -- Gera o próximo código item
+    SELECT COALESCE(MAX(codigo), 0) + 1 INTO v_codigo 
+    FROM tb_manutencao_ordem_servico_item 
+    WHERE codigo_empresa = p_codigo_empresa
+	AND   codigo_ordem_servico = p_codigo_os;
+
+    INSERT INTO tb_manutencao_ordem_servico_item (			 			
+    	codigo ,
+    	codigo_empresa ,
+    	codigo_ordem_servico,
+    	codigo_item ,
+    	quantidade ,
+    	valor_unitario ,
+		data_ultima_alteracao ,
+	    codigo_usuario_ultima_alteracao 
+    ) VALUES (
+		v_codigo,
+   		p_codigo_empresa ,
+   		p_codigo_os ,
+   		p_codigo_item ,
+   		p_quantidade ,
+		p_valor,
+   		p_data_ultima_alteracao ,
+   		p_codigo_usuario_ultima_alteracao 
+	
+    );
+    
+END;
+$$;
+
+
+ALTER PROCEDURE public.sp_ordem_servico_insert_os_item_criacao(IN p_codigo_empresa integer, IN p_codigo_os bigint, IN p_codigo_item bigint, IN p_valor numeric, IN p_quantidade numeric, IN p_data_ultima_alteracao date, IN p_codigo_usuario_ultima_alteracao bigint) OWNER TO postgres;
 
 --
 -- Name: sp_update_cadastro_basico_ambiente(integer, character varying); Type: PROCEDURE; Schema: public; Owner: postgres
@@ -752,10 +798,12 @@ ALTER TABLE public.tb_manutencao_ordem_servico OWNER TO postgres;
 CREATE TABLE public.tb_manutencao_ordem_servico_item (
     codigo integer NOT NULL,
     codigo_empresa integer NOT NULL,
-    codigo_ordem_servico integer,
+    codigo_ordem_servico integer NOT NULL,
     codigo_item integer,
     quantidade double precision,
-    valor_unitario double precision
+    valor_unitario double precision,
+    data_ultima_alteracao date,
+    codigo_usuario_ultima_alteracao bigint
 );
 
 
@@ -914,7 +962,7 @@ ALTER TABLE ONLY public.tb_cad_usuario
 --
 
 ALTER TABLE ONLY public.tb_manutencao_ordem_servico_item
-    ADD CONSTRAINT tb_manutencao_ordem_servico_item_pkey PRIMARY KEY (codigo, codigo_empresa);
+    ADD CONSTRAINT tb_manutencao_ordem_servico_item_pkey PRIMARY KEY (codigo, codigo_empresa, codigo_ordem_servico);
 
 
 --

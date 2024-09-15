@@ -100,6 +100,32 @@ $$;
 ALTER FUNCTION public.fn_listar_itens(p_codigo_empresa integer) OWNER TO postgres;
 
 --
+-- Name: fn_ordem_servico_load_item(bigint, bigint); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.fn_ordem_servico_load_item(p_codigo_empresa bigint, p_codigo_os bigint) RETURNS TABLE(codigo integer, codigo_empresa integer, codigo_ordem_servico integer, codigo_item integer, quantidade double precision, valor_unitario double precision)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+   	tb_manutencao_ordem_servico_item.codigo ,
+    tb_manutencao_ordem_servico_item.codigo_empresa ,
+    tb_manutencao_ordem_servico_item.codigo_ordem_servico ,
+    tb_manutencao_ordem_servico_item.codigo_item ,
+    tb_manutencao_ordem_servico_item.quantidade ,
+    tb_manutencao_ordem_servico_item.valor_unitario 
+  FROM 
+    tb_manutencao_ordem_servico_item
+  WHERE tb_manutencao_ordem_servico_item.codigo_empresa = p_codigo_empresa
+	AND tb_manutencao_ordem_servico_item.codigo_ordem_servico = p_codigo_os;
+END;
+$$;
+
+
+ALTER FUNCTION public.fn_ordem_servico_load_item(p_codigo_empresa bigint, p_codigo_os bigint) OWNER TO postgres;
+
+--
 -- Name: sp_atualizar_parceiro_negocio(integer, character varying, boolean, character varying, character varying, character varying, character varying, character varying, character varying, character varying, character varying, integer); Type: PROCEDURE; Schema: public; Owner: postgres
 --
 

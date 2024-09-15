@@ -164,9 +164,49 @@ const criarItensAoCriarOS = async (req, res) => {
   }
 };
 
+const loadItemOs = async (req, res) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const decoded = decodeJWT(token);
+
+    if (!decoded) {
+      return res.status(401).send('Token inválido ou expirado');
+    }
+
+    const codigo_empresa = decoded.codigo_empresa;
+    const codigo_os = req.params.codigo_os;
+    
+
+    const [item_os] = await sequelize.query(
+      `SELECT * FROM fn_ordem_servico_load_item(
+        :p_codigo_empresa::BIGINT, 
+        :p_codigo_os::BIGINT
+      )`, 
+      {
+        replacements: {
+          p_codigo_empresa: codigo_empresa,
+          p_codigo_os: codigo_os
+        },
+      }
+    );  
+    
+    console.log('items retornados:', item_os);
+
+    if (!item_os || item_os.length === 0) {
+      return res.status(404).send('Nenhum item encontrado para essa OS.');
+    }
+
+    res.json(item_os); 
+  } catch (err) {
+    console.error('Erro ao listar item_os:', err.message);
+    res.status(500).send('Erro no servidor');
+  }
+};
+
 module.exports = {
   listaAtivoPorCliente,
   listarItens,
   criarOs,
   criarItensAoCriarOS,
+  loadItemOs,
 };

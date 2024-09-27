@@ -164,7 +164,50 @@ const criarItensAoCriarOS = async (req, res) => {
   }
 };
 
-//TODO - Criar também o load de ativo
+const editarDadosOS = async (req, res) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const decoded = decodeJWT(token);
+
+    if (!decoded) {
+      return res.status(401).send('Token inválido ou expirado');
+    }
+
+    const {
+      body_codigo_os,
+      body_codigo_cliente,
+      body_codigo_ativo,
+      body_observacao,
+    } = req.body;
+      
+    const codigo_empresa = decoded.codigo_empresa;
+    const codigo_usuario = decoded.id;
+
+    await sequelize.query(`
+          CALL sp_ordem_servico_update_dados(
+          :p_codigo_ordem_servico             ::BIGINT,
+          :p_codigo_empresa                   ::INT,
+          :p_codigo_cliente                   ::INT,
+          :p_codigo_ativo                     ::INT,
+          :p_observacao                       ::VARCHAR,
+          :p_codigo_usuario_ultima_alteracao  ::INT)`, 
+    {
+      replacements: {
+        p_codigo_ordem_servico             :body_codigo_os,
+        p_codigo_empresa                   :codigo_empresa,
+        p_codigo_cliente                   :body_codigo_cliente,
+        p_codigo_ativo                     :body_codigo_ativo,
+        p_observacao                       :body_observacao,
+        p_codigo_usuario_ultima_alteracao  :codigo_usuario
+      },
+    });
+
+    res.status(201).send('OS editada com sucesso');
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
 
 const loadDados = async (req, res) => {
   try {
@@ -250,4 +293,5 @@ module.exports = {
   criarItensAoCriarOS,
   loadItemOs,
   loadDados,
+  editarDadosOS
 };

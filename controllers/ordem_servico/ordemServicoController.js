@@ -164,6 +164,46 @@ const criarItensAoCriarOS = async (req, res) => {
   }
 };
 
+//TODO - Criar também o load de ativo
+
+const loadDados = async (req, res) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const decoded = decodeJWT(token);
+
+    if (!decoded) {
+      return res.status(401).send('Token inválido ou expirado');
+    }
+
+    const codigo_empresa = decoded.codigo_empresa;
+    const codigo_os = req.params.codigo_os;
+
+    const [dados_os] = await sequelize.query(
+      `SELECT * FROM fn_ordem_servico_load_dados(
+        :p_codigo_empresa   ::BIGINT, 
+        :p_codigo_os        ::BIGINT
+      )`, 
+      {
+        replacements: {
+          p_codigo_empresa  : codigo_empresa,
+          p_codigo_os       : codigo_os
+        },
+      }
+    );  
+    
+    console.log('items retornados:', dados_os);
+
+    if (!dados_os || dados_os.length === 0) {
+      return res.status(404).send('Nenhum dado encontrado para essa OS.');
+    }
+
+    res.json(dados_os); 
+  } catch (err) {
+    console.error('Erro ao listar item_os:', err.message);
+    res.status(500).send('Erro no servidor');
+  }
+};
+
 const loadItemOs = async (req, res) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
@@ -209,4 +249,5 @@ module.exports = {
   criarOs,
   criarItensAoCriarOS,
   loadItemOs,
+  loadDados,
 };

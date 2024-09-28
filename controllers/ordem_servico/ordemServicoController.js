@@ -209,6 +209,53 @@ const editarDadosOS = async (req, res) => {
   }
 };
 
+const editarItemOS = async (req, res) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const decoded = decodeJWT(token);
+
+    if (!decoded) {
+      return res.status(401).send('Token inválido ou expirado');
+    }
+
+    const {
+      body_codigo_item,
+      body_codigo_os,
+      body_codigo_item_estoque,
+      body_quantidade,
+      body_valor_unitario,
+    } = req.body;
+      
+    const codigo_empresa = decoded.codigo_empresa;
+    const codigo_usuario = decoded.id;    
+
+    await sequelize.query(`
+          CALL sp_ordem_servico_update_item(
+          :p_codigo_item                      ::BIGINT,
+          :p_codigo_empresa                   ::INT,
+          :p_codigo_os                        ::INT,
+          :p_codigo_item_estoque              ::INT,
+          :p_quantidade                       ::DOUBLE PRECISION,
+          :p_valor_unitario                   ::DOUBLE PRECISION,
+          :p_codigo_usuario_ultima_alteracao  ::BIGINT)`, 
+    {
+      replacements: {
+        p_codigo_item                       : body_codigo_item ,
+        p_codigo_os                         : body_codigo_os ,
+        p_codigo_item_estoque               : body_codigo_item_estoque , 
+        p_quantidade                        : body_quantidade ,
+        p_valor_unitario                    : body_valor_unitario ,
+        p_codigo_usuario_ultima_alteracao   : codigo_usuario ,
+      },
+    });
+
+    res.status(201).send(' Itens da OS editados com sucesso');
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
 const loadDados = async (req, res) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
@@ -293,5 +340,6 @@ module.exports = {
   criarItensAoCriarOS,
   loadItemOs,
   loadDados,
-  editarDadosOS
+  editarDadosOS,
+  editarItemOS
 };

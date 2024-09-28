@@ -7,6 +7,7 @@ const {
     loadItemOs,
     loadDados,
     editarDadosOS,
+    editarItemOS,
 } = require('../../controllers/ordem_servico/ordemServicoController');
 
 const router = express.Router();
@@ -23,8 +24,7 @@ router.post('/ordem-servico/criar_os/inserir_item', criarItensAoCriarOS);
 
 //PUTS
 router.put('/ordem-servico/editar_os/editar_dados', editarDadosOS);
-
-//TODO - UPDATE DADOS DA OS
+router.put('/ordem-servico/editar_os/editar_item', editarItemOS);
 //TODO - UPDATE ITENS DA OS
 
 //DELETES

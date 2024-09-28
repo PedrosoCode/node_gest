@@ -505,15 +505,14 @@ CREATE PROCEDURE public.sp_ordem_servico_update_item(IN p_codigo_item bigint, IN
     AS $$
 BEGIN
     UPDATE tb_manutencao_ordem_servico_item
-    SET codigo 								= p_codigo_item,
-        codigo_empresa		 				= p_codigo_empresa,
+    SET 
         codigo_item 						= p_codigo_item_estoque,
 		codigo_ordem_servico				= p_codigo_os,
 		quantidade							= p_quantidade,
 		valor_unitario						= p_valor_unitario,
         data_ultima_alteracao 				= NOW(),
         codigo_usuario_ultima_alteracao 	= p_codigo_usuario_ultima_alteracao
-    WHERE 	codigo = p_codigo_item_estoque 
+    WHERE 	codigo = p_codigo_item 
     AND 	codigo_empresa = p_codigo_empresa
 	AND 	codigo_ordem_servico = p_codigo_os;
 END;

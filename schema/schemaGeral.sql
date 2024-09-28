@@ -497,6 +497,32 @@ $$;
 ALTER PROCEDURE public.sp_ordem_servico_update_dados(IN p_codigo_ordem_servico bigint, IN p_codigo_empresa integer, IN p_codigo_cliente integer, IN p_codigo_ativo integer, IN p_observacao character varying, IN p_codigo_usuario_ultima_alteracao integer) OWNER TO postgres;
 
 --
+-- Name: sp_ordem_servico_update_item(bigint, integer, integer, integer, double precision, double precision, bigint); Type: PROCEDURE; Schema: public; Owner: postgres
+--
+
+CREATE PROCEDURE public.sp_ordem_servico_update_item(IN p_codigo_item bigint, IN p_codigo_empresa integer, IN p_codigo_os integer, IN p_codigo_item_estoque integer, IN p_quantidade double precision, IN p_valor_unitario double precision, IN p_codigo_usuario_ultima_alteracao bigint)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    UPDATE tb_manutencao_ordem_servico_item
+    SET codigo 								= p_codigo_item,
+        codigo_empresa		 				= p_codigo_empresa,
+        codigo_item 						= p_codigo_item_estoque,
+		codigo_ordem_servico				= p_codigo_os,
+		quantidade							= p_quantidade,
+		valor_unitario						= p_valor_unitario,
+        data_ultima_alteracao 				= NOW(),
+        codigo_usuario_ultima_alteracao 	= p_codigo_usuario_ultima_alteracao
+    WHERE 	codigo = p_codigo_item_estoque 
+    AND 	codigo_empresa = p_codigo_empresa
+	AND 	codigo_ordem_servico = p_codigo_os;
+END;
+$$;
+
+
+ALTER PROCEDURE public.sp_ordem_servico_update_item(IN p_codigo_item bigint, IN p_codigo_empresa integer, IN p_codigo_os integer, IN p_codigo_item_estoque integer, IN p_quantidade double precision, IN p_valor_unitario double precision, IN p_codigo_usuario_ultima_alteracao bigint) OWNER TO postgres;
+
+--
 -- Name: sp_update_cadastro_basico_ambiente(integer, character varying); Type: PROCEDURE; Schema: public; Owner: postgres
 --
 

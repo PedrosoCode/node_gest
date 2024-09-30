@@ -388,6 +388,75 @@ $$;
 ALTER PROCEDURE public.sp_insert_cadastro_basico_parceiro_negocio(IN nome_razao_social character varying, IN is_cnpj boolean, IN documento character varying, IN endereco character varying, IN cidade character varying, IN estado character varying, IN cep character varying, IN telefone character varying, IN email character varying, IN tipo_parceiro character varying, IN p_codigo_empresa integer) OWNER TO postgres;
 
 --
+-- Name: sp_manutencao_ordem_servico_delete_item(bigint, integer, integer); Type: PROCEDURE; Schema: public; Owner: postgres
+--
+
+CREATE PROCEDURE public.sp_manutencao_ordem_servico_delete_item(IN p_codigo_item bigint, IN p_codigo_empresa integer, IN p_codigo_os integer)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    DELETE FROM tb_manutencao_ordem_servico_item
+    WHERE 	codigo = p_codigo_item 
+    AND 	codigo_empresa = p_codigo_empresa
+	AND 	codigo_ordem_servico = p_codigo_os;
+END;
+$$;
+
+
+ALTER PROCEDURE public.sp_manutencao_ordem_servico_delete_item(IN p_codigo_item bigint, IN p_codigo_empresa integer, IN p_codigo_os integer) OWNER TO postgres;
+
+--
+-- Name: sp_manutencao_ordem_servico_upsert_item(integer, bigint, bigint, integer, double precision, numeric, bigint); Type: PROCEDURE; Schema: public; Owner: postgres
+--
+
+CREATE PROCEDURE public.sp_manutencao_ordem_servico_upsert_item(IN p_codigo_empresa integer, IN p_codigo_os bigint, IN p_codigo_item bigint, IN p_codigo_item_estoque integer, IN p_valor_unitario double precision, IN p_quantidade numeric, IN p_codigo_usuario_ultima_alteracao bigint)
+    LANGUAGE plpgsql
+    AS $$
+	-- Declaração de variável para o novo código
+	DECLARE v_codigo integer;
+		
+BEGIN
+	-- Gera o próximo código do item, caso seja necessário inserir
+	SELECT COALESCE(MAX(codigo), 0) + 1 INTO v_codigo
+	FROM tb_manutencao_ordem_servico_item
+	WHERE codigo_empresa = p_codigo_empresa
+	AND codigo_ordem_servico = p_codigo_os;
+
+	-- Faz o UPSERT: insere um novo item ou atualiza o existente com base no conflito
+	INSERT INTO tb_manutencao_ordem_servico_item (
+		codigo,
+		codigo_empresa,
+		codigo_ordem_servico,
+		codigo_item,
+		quantidade,
+		valor_unitario,
+		data_ultima_alteracao,
+		codigo_usuario_ultima_alteracao
+	) VALUES (
+		v_codigo,
+		p_codigo_empresa,
+		p_codigo_os,
+		p_codigo_item_estoque,
+		p_quantidade,
+		p_valor_unitario,
+		NOW(),
+		p_codigo_usuario_ultima_alteracao
+	)
+	ON CONFLICT (codigo, codigo_empresa, codigo_ordem_servico)
+	DO UPDATE SET
+		codigo_item 						= EXCLUDED.codigo_item,
+		quantidade							= EXCLUDED.quantidade,
+		valor_unitario						= EXCLUDED.valor_unitario,
+		data_ultima_alteracao 				= NOW(),
+		codigo_usuario_ultima_alteracao 	= EXCLUDED.codigo_usuario_ultima_alteracao;
+
+END;
+$$;
+
+
+ALTER PROCEDURE public.sp_manutencao_ordem_servico_upsert_item(IN p_codigo_empresa integer, IN p_codigo_os bigint, IN p_codigo_item bigint, IN p_codigo_item_estoque integer, IN p_valor_unitario double precision, IN p_quantidade numeric, IN p_codigo_usuario_ultima_alteracao bigint) OWNER TO postgres;
+
+--
 -- Name: sp_ordem_servico_insert_os(integer, integer, bigint, text, date, date, bigint); Type: FUNCTION; Schema: public; Owner: postgres
 --
 

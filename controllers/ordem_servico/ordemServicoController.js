@@ -227,9 +227,9 @@ const deletarItemOS = async (req, res) => {
 
     await sequelize.query(`
       CALL sp_manutencao_ordem_servico_delete_item(
-      :p_codigo_item      bigint,
-	    :p_codigo_empresa   integer,
-	    :p_codigo_os        integer
+      :p_codigo_item      ::bigint,
+	    :p_codigo_empresa   ::integer,
+	    :p_codigo_os        ::integer
       )`, 
     {
       replacements: {
@@ -268,14 +268,14 @@ const upsertItemOS = async (req, res) => {
     const codigo_usuario = decoded.id;    
 
     await sequelize.query(`
-          CALL sp_ordem_servico_update_item(
-          :p_codigo_empresa 					        integer,
-	        :p_codigo_os 							          bigint,
-	        :p_codigo_item 						          bigint,
-	        :p_codigo_item_estoque 				      integer,
-	        :p_valor_unitario 					        double precision,
-	        :p_quantidade 						          numeric,
-	        :p_codigo_usuario_ultima_alteracao 	bigint)`, 
+          CALL sp_manutencao_ordem_servico_upsert_item(
+          :p_codigo_empresa 					        ::integer,
+	        :p_codigo_os 							          ::bigint,
+	        :p_codigo_item 						          ::bigint,
+	        :p_codigo_item_estoque 				      ::integer,
+	        :p_valor_unitario 					        ::double precision,
+	        :p_quantidade 						          ::numeric,
+	        :p_codigo_usuario_ultima_alteracao 	::bigint)`, 
     {
       replacements: {
         p_codigo_empresa                  : codigo_empresa ,

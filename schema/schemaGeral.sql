@@ -412,43 +412,35 @@ ALTER PROCEDURE public.sp_manutencao_ordem_servico_delete_item(IN p_codigo_item 
 CREATE PROCEDURE public.sp_manutencao_ordem_servico_upsert_item(IN p_codigo_empresa integer, IN p_codigo_os bigint, IN p_codigo_item bigint, IN p_codigo_item_estoque integer, IN p_valor_unitario double precision, IN p_quantidade numeric, IN p_codigo_usuario_ultima_alteracao bigint)
     LANGUAGE plpgsql
     AS $$
-	-- Declaração de variável para o novo código
-	DECLARE v_codigo integer;
-		
 BEGIN
-	-- Gera o próximo código do item, caso seja necessário inserir
-	SELECT COALESCE(MAX(codigo), 0) + 1 INTO v_codigo
-	FROM tb_manutencao_ordem_servico_item
-	WHERE codigo_empresa = p_codigo_empresa
-	AND codigo_ordem_servico = p_codigo_os;
 
-	-- Faz o UPSERT: insere um novo item ou atualiza o existente com base no conflito
-	INSERT INTO tb_manutencao_ordem_servico_item (
-		codigo,
-		codigo_empresa,
-		codigo_ordem_servico,
-		codigo_item,
-		quantidade,
-		valor_unitario,
-		data_ultima_alteracao,
-		codigo_usuario_ultima_alteracao
-	) VALUES (
-		v_codigo,
-		p_codigo_empresa,
-		p_codigo_os,
-		p_codigo_item_estoque,
-		p_quantidade,
-		p_valor_unitario,
-		NOW(),
-		p_codigo_usuario_ultima_alteracao
-	)
-	ON CONFLICT (codigo, codigo_empresa, codigo_ordem_servico)
-	DO UPDATE SET
-		codigo_item 						= EXCLUDED.codigo_item,
-		quantidade							= EXCLUDED.quantidade,
-		valor_unitario						= EXCLUDED.valor_unitario,
-		data_ultima_alteracao 				= NOW(),
-		codigo_usuario_ultima_alteracao 	= EXCLUDED.codigo_usuario_ultima_alteracao;
+  -- Faz o UPSERT: insere um novo item ou atualiza o existente com base no conflito
+  INSERT INTO tb_manutencao_ordem_servico_item (
+    codigo,
+    codigo_empresa,
+    codigo_ordem_servico,
+    codigo_item,
+    quantidade,
+    valor_unitario,
+    data_ultima_alteracao,
+    codigo_usuario_ultima_alteracao
+  ) VALUES (
+    p_codigo_item,
+    p_codigo_empresa,
+    p_codigo_os,
+    p_codigo_item_estoque,
+    p_quantidade,
+    p_valor_unitario,
+    NOW(),
+    p_codigo_usuario_ultima_alteracao
+  )
+  ON CONFLICT (codigo, codigo_empresa, codigo_ordem_servico)
+  DO UPDATE SET
+    codigo_item                       = EXCLUDED.codigo_item,
+    quantidade                        = EXCLUDED.quantidade,
+    valor_unitario                    = EXCLUDED.valor_unitario,
+    data_ultima_alteracao             = NOW(),
+    codigo_usuario_ultima_alteracao   = EXCLUDED.codigo_usuario_ultima_alteracao;
 
 END;
 $$;
@@ -1180,6 +1172,14 @@ CREATE UNIQUE INDEX idx_documento ON public.tb_cad_parceiro_negocio USING btree 
 
 ALTER TABLE ONLY public.tb_cad_ativo_foto
     ADD CONSTRAINT fk_codigo_ativo FOREIGN KEY (codigo_ativo, codigo_empresa) REFERENCES public.tb_cad_ativo(codigo, codigo_empresa) ON DELETE CASCADE;
+
+
+--
+-- Name: tb_manutencao_ordem_servico_item fk_constraint_os_item; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_manutencao_ordem_servico_item
+    ADD CONSTRAINT fk_constraint_os_item FOREIGN KEY (codigo_empresa, codigo_ordem_servico) REFERENCES public.tb_manutencao_ordem_servico(codigo_empresa, codigo) ON DELETE CASCADE;
 
 
 --

@@ -26,14 +26,15 @@ router.post('/ordem-servico/criar_os/inserir_item', criarItensAoCriarOS);
 
 //PUTS
 router.put('/ordem-servico/editar_os/editar_dados', editarDadosOS);
-router.put('/ordem-servico/editar_os/editar_item', editarItemOS); //REVIEW - Possívelmente, eliminar este endpoint
 
 //TODO - UPDATE ITENS DA OS
-router.put('/ordem-servico/upsert_item', upsertItemOS); //Lógica de Update e Insert no mesmo endpoint  //REVIEW -  - testar esse endpoint
+router.put('/ordem-servico/upsert_item', upsertItemOS); //Lógica de Update e Insert no mesmo endpoint 
+                                                                                                    
 
 //DELETES
 //TODO - DELETE DE ITENS DA OS
-router.delete('/ordem-servico/editar_os/deletar_item', deletarItemOS); //REVIEW - Testar esse 
+router.delete('/ordem-servico/editar_os/deletar_item', deletarItemOS); 
+//TODO - Endpoint de delete da OS
 
 
 module.exports = router;

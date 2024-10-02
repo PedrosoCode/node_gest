@@ -406,6 +406,23 @@ $$;
 ALTER PROCEDURE public.sp_manutencao_ordem_servico_delete_item(IN p_codigo_item bigint, IN p_codigo_empresa integer, IN p_codigo_os integer) OWNER TO postgres;
 
 --
+-- Name: sp_manutencao_ordem_servico_delete_os(integer, integer); Type: PROCEDURE; Schema: public; Owner: postgres
+--
+
+CREATE PROCEDURE public.sp_manutencao_ordem_servico_delete_os(IN p_codigo_empresa integer, IN p_codigo_os integer)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    DELETE FROM tb_manutencao_ordem_servico
+    WHERE 	codigo = p_codigo_os 
+    AND 	codigo_empresa = p_codigo_empresa;
+END;
+$$;
+
+
+ALTER PROCEDURE public.sp_manutencao_ordem_servico_delete_os(IN p_codigo_empresa integer, IN p_codigo_os integer) OWNER TO postgres;
+
+--
 -- Name: sp_manutencao_ordem_servico_upsert_item(integer, bigint, bigint, integer, double precision, numeric, bigint); Type: PROCEDURE; Schema: public; Owner: postgres
 --
 
@@ -428,7 +445,7 @@ BEGIN
     p_codigo_item,
     p_codigo_empresa,
     p_codigo_os,
-    p_codigo_item_estoque,
+    p_codigo_item_estoque, -- Corrigido para usar p_codigo_item em vez de p_codigo_item_estoque
     p_quantidade,
     p_valor_unitario,
     NOW(),

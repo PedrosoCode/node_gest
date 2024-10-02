@@ -7,9 +7,9 @@ const {
     loadItemOs,
     loadDados,
     editarDadosOS,
-    editarItemOS,
     deletarItemOS,
     upsertItemOS,
+    deletarOS,
 } = require('../../controllers/ordem_servico/ordemServicoController');
 
 const router = express.Router();
@@ -34,7 +34,7 @@ router.put('/ordem-servico/upsert_item', upsertItemOS); //Lógica de Update e In
 //DELETES
 //TODO - DELETE DE ITENS DA OS
 router.delete('/ordem-servico/editar_os/deletar_item', deletarItemOS); 
-//TODO - Endpoint de delete da OS
+router.delete('/ordem-servico/editar_os/deletar_os', deletarOS); 
 
 
 module.exports = router;

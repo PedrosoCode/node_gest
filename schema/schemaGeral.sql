@@ -719,6 +719,20 @@ CREATE TABLE public.max_codigo (
 ALTER TABLE public.max_codigo OWNER TO postgres;
 
 --
+-- Name: tb_agendamento_ativo; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tb_agendamento_ativo (
+    codigo bigint NOT NULL,
+    codigo_empresa integer NOT NULL,
+    codigo_agendamento integer NOT NULL,
+    codigo_ativo integer
+);
+
+
+ALTER TABLE public.tb_agendamento_ativo OWNER TO postgres;
+
+--
 -- Name: tb_ambientes; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -880,7 +894,9 @@ ALTER SEQUENCE public.tb_cad_parceiro_negocio_id_seq OWNED BY public.tb_cad_parc
 
 CREATE TABLE public.tb_cad_tecnico (
     codigo integer NOT NULL,
-    nome character varying(255) NOT NULL
+    nome character varying(255) NOT NULL,
+    codigo_empresa integer,
+    ativo boolean
 );
 
 
@@ -961,6 +977,24 @@ CREATE TABLE public.tb_info_empresa (
 ALTER TABLE public.tb_info_empresa OWNER TO postgres;
 
 --
+-- Name: tb_manutencao_agendamento; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tb_manutencao_agendamento (
+    codigo integer NOT NULL,
+    codigo_empresa integer NOT NULL,
+    data_input date,
+    data_agendada timestamp without time zone,
+    codigo_tipo_manutencao integer,
+    codigo_parceiro_negocio integer,
+    descricao character varying,
+    observacao character varying
+);
+
+
+ALTER TABLE public.tb_manutencao_agendamento OWNER TO postgres;
+
+--
 -- Name: tb_manutencao_ordem_servico; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -968,15 +1002,31 @@ CREATE TABLE public.tb_manutencao_ordem_servico (
     codigo integer NOT NULL,
     codigo_empresa integer NOT NULL,
     codigo_parceiro_negocio integer,
-    codigo_ativo integer,
     observacao character varying,
     data_criacao date,
     data_ultima_alteracao date,
-    codigo_usuario_ultima_alteracao bigint
+    codigo_usuario_ultima_alteracao bigint,
+    codigo_tecnico integer,
+    status integer,
+    codigo_tipo_manutencao integer
 );
 
 
 ALTER TABLE public.tb_manutencao_ordem_servico OWNER TO postgres;
+
+--
+-- Name: tb_manutencao_ordem_servico_ativo; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tb_manutencao_ordem_servico_ativo (
+    codigo integer NOT NULL,
+    codigo_ativo integer,
+    codigo_empresa integer NOT NULL,
+    codigo_os bigint NOT NULL
+);
+
+
+ALTER TABLE public.tb_manutencao_ordem_servico_ativo OWNER TO postgres;
 
 --
 -- Name: tb_manutencao_ordem_servico_item; Type: TABLE; Schema: public; Owner: postgres
@@ -990,11 +1040,25 @@ CREATE TABLE public.tb_manutencao_ordem_servico_item (
     quantidade double precision,
     valor_unitario double precision,
     data_ultima_alteracao date,
-    codigo_usuario_ultima_alteracao bigint
+    codigo_usuario_ultima_alteracao bigint,
+    codigo_ativo_vinculado integer
 );
 
 
 ALTER TABLE public.tb_manutencao_ordem_servico_item OWNER TO postgres;
+
+--
+-- Name: tb_manutencao_ordem_servico_tecnico; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tb_manutencao_ordem_servico_tecnico (
+    codigo_os bigint NOT NULL,
+    codigo_tecnico integer NOT NULL,
+    codigo_empresa integer NOT NULL
+);
+
+
+ALTER TABLE public.tb_manutencao_ordem_servico_tecnico OWNER TO postgres;
 
 --
 -- Name: tb_stc_nivel_prioridade; Type: TABLE; Schema: public; Owner: postgres
@@ -1029,6 +1093,19 @@ ALTER SEQUENCE public.tb_stc_nivel_prioridade_codigo_seq OWNER TO postgres;
 
 ALTER SEQUENCE public.tb_stc_nivel_prioridade_codigo_seq OWNED BY public.tb_stc_nivel_prioridade.codigo;
 
+
+--
+-- Name: tb_stc_tipo_manutencao; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tb_stc_tipo_manutencao (
+    codigo integer,
+    descricao character varying,
+    ativo boolean
+);
+
+
+ALTER TABLE public.tb_stc_tipo_manutencao OWNER TO postgres;
 
 --
 -- Name: tb_ambientes id; Type: DEFAULT; Schema: public; Owner: postgres
@@ -1089,6 +1166,14 @@ ALTER TABLE ONLY public.tb_info_empresa
 
 
 --
+-- Name: tb_agendamento_ativo tb_agendamento_ativo_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_agendamento_ativo
+    ADD CONSTRAINT tb_agendamento_ativo_pkey PRIMARY KEY (codigo, codigo_empresa, codigo_agendamento);
+
+
+--
 -- Name: tb_ambientes tb_ambientes_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1145,6 +1230,22 @@ ALTER TABLE ONLY public.tb_cad_usuario
 
 
 --
+-- Name: tb_manutencao_agendamento tb_manutencao_agendamento_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_manutencao_agendamento
+    ADD CONSTRAINT tb_manutencao_agendamento_pkey PRIMARY KEY (codigo, codigo_empresa);
+
+
+--
+-- Name: tb_manutencao_ordem_servico_ativo tb_manutencao_ordem_servico_ativo_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_manutencao_ordem_servico_ativo
+    ADD CONSTRAINT tb_manutencao_ordem_servico_ativo_pkey PRIMARY KEY (codigo, codigo_empresa, codigo_os);
+
+
+--
 -- Name: tb_manutencao_ordem_servico_item tb_manutencao_ordem_servico_item_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1158,6 +1259,14 @@ ALTER TABLE ONLY public.tb_manutencao_ordem_servico_item
 
 ALTER TABLE ONLY public.tb_manutencao_ordem_servico
     ADD CONSTRAINT tb_manutencao_ordem_servico_pkey PRIMARY KEY (codigo, codigo_empresa);
+
+
+--
+-- Name: tb_manutencao_ordem_servico_tecnico tb_manutencao_ordem_servico_tecnico_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_manutencao_ordem_servico_tecnico
+    ADD CONSTRAINT tb_manutencao_ordem_servico_tecnico_pkey PRIMARY KEY (codigo_os, codigo_tecnico, codigo_empresa);
 
 
 --
@@ -1208,11 +1317,35 @@ ALTER TABLE ONLY public.tb_cad_ativo
 
 
 --
+-- Name: tb_agendamento_ativo tb_agendamento_ativo_codigo_agendamento_codigo_empresa_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_agendamento_ativo
+    ADD CONSTRAINT tb_agendamento_ativo_codigo_agendamento_codigo_empresa_fkey FOREIGN KEY (codigo_agendamento, codigo_empresa) REFERENCES public.tb_manutencao_agendamento(codigo, codigo_empresa);
+
+
+--
 -- Name: tb_cad_item tb_cad_item_codigo_empresa_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.tb_cad_item
     ADD CONSTRAINT tb_cad_item_codigo_empresa_fkey FOREIGN KEY (codigo_empresa) REFERENCES public.tb_info_empresa(codigo);
+
+
+--
+-- Name: tb_manutencao_ordem_servico_ativo tb_manutencao_ordem_servico_ativo_codigo_os_codigo_empresa_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_manutencao_ordem_servico_ativo
+    ADD CONSTRAINT tb_manutencao_ordem_servico_ativo_codigo_os_codigo_empresa_fkey FOREIGN KEY (codigo_os, codigo_empresa) REFERENCES public.tb_manutencao_ordem_servico(codigo, codigo_empresa);
+
+
+--
+-- Name: tb_manutencao_ordem_servico_tecnico tb_manutencao_ordem_servico_tecni_codigo_os_codigo_empresa_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_manutencao_ordem_servico_tecnico
+    ADD CONSTRAINT tb_manutencao_ordem_servico_tecni_codigo_os_codigo_empresa_fkey FOREIGN KEY (codigo_os, codigo_empresa) REFERENCES public.tb_manutencao_ordem_servico(codigo, codigo_empresa);
 
 
 --

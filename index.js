@@ -31,6 +31,21 @@ app.use('/api', cadBasAtivoRoutes);
 app.use('/api', cadBasItemRoutes);
 app.use('/api', ordemServicoRoutes);
 
+//TODO - Rota para CRUD de técnicos
+        //NOTE - SCHEMA Já criado no banco de dados
+
+//TODO - Rota para CRUD de agendamentos de manutenção
+        //NOTE - SCHEMA já criado no banco de dados
+        //REVIEW - Verificar a viabilidade criar agendamentos automaticamente a partir de OS
+
+
+//REVIEW - Nos controladores de CRUD de itens, alterar para incluir também o campo codigo_ativo_vinculado
+//       - esse codigo serve para vincular de forma mais fácil cada item a um diferente ativo para controlar OS que sejam grandes
+          //NOTE - Alteração já feita no banco
+          //REVIEW - Refatorar os CRUDS de item
+
+//REVIEW - Analisar para trocar a escala da OS atual que é (N:1) para (N:N) na relação OS x ATIVO (famoso drop column) e refatorar os controladores e procs/fns
+
 // Sincroniza o Sequelize com o banco de dados
 sequelize.sync({ force: false }).then(() => {
   console.log('Database & tables created!');

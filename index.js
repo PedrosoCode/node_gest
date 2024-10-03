@@ -8,7 +8,7 @@ const authRoutes = require('./routes/auth/authRoutes');
 const parceiroNegocioRoutes = require('./routes/cadastro_basico/parceiro_negocio/parceiroNegocioRoutes');
 const cadBasAtivoRoutes = require('./routes/cadastro_basico/ativo/cadBasAtivoRouter');
 const cadBasItemRoutes = require('./routes/cadastro_basico/item/cadBasItemRouter');
-
+const cadastroTecnico = require('./routes/cadastro_basico/tenico/TecnicoRoutes');
 const ordemServicoRoutes = require('./routes/ordem_servico/ordemServicoRoutes');
 
 const app = express();
@@ -31,12 +31,17 @@ app.use('/api', cadBasAtivoRoutes);
 app.use('/api', cadBasItemRoutes);
 app.use('/api', ordemServicoRoutes);
 
-//TODO - Rota para CRUD de técnicos
-        //NOTE - SCHEMA Já criado no banco de dados
+app.use('/api', cadastroTecnico);
 
 //TODO - Rota para CRUD de agendamentos de manutenção
         //NOTE - SCHEMA já criado no banco de dados
         //REVIEW - Verificar a viabilidade criar agendamentos automaticamente a partir de OS
+
+//TODO - Verificar a viabilidade de um módulo de histórica dos ativos
+        //REVIEW - Aproveitar para incluir uma visualização em massa dos status dos ativos
+        //TODO - incluir um componente de calendários com manutenções passadas e agendamentos futuros
+
+//TODO - ROta de Crud completa de NMs - Necessidade de manutenção
 
 
 //REVIEW - Nos controladores de CRUD de itens, alterar para incluir também o campo codigo_ativo_vinculado

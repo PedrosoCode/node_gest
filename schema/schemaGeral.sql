@@ -33,6 +33,29 @@ $$;
 ALTER FUNCTION public.fn_buscar_prioridade() OWNER TO postgres;
 
 --
+-- Name: fn_cadastro_listar_tecnico(integer); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.fn_cadastro_listar_tecnico(p_codigo_empresa integer) RETURNS TABLE(req_codigo_tecnico integer, req_nome_tecnico character varying, req_codigo_empresa integer, req_ativo boolean, req_data_input date)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+		tb_cad_tecnico.codigo AS req_codigo_tecnico,
+		tb_cad_tecnico.nome AS req_nome_tecnico,
+		tb_cad_tecnico.codigo_empresa AS req_codigo_empresa,
+		tb_cad_tecnico.ativo AS req_ativo,
+		tb_cad_tecnico.data_input AS req_data_input
+    FROM tb_cad_tecnico
+    WHERE tb_cad_tecnico.codigo_empresa = p_codigo_empresa;
+END;
+$$;
+
+
+ALTER FUNCTION public.fn_cadastro_listar_tecnico(p_codigo_empresa integer) OWNER TO postgres;
+
+--
 -- Name: fn_listar_ativos(integer, integer); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -209,6 +232,58 @@ $$;
 
 
 ALTER PROCEDURE public.sp_cadastro_basico_ambiente(IN nome_ambiente character varying) OWNER TO postgres;
+
+--
+-- Name: sp_cadastro_delete_tecnico(integer, integer); Type: PROCEDURE; Schema: public; Owner: postgres
+--
+
+CREATE PROCEDURE public.sp_cadastro_delete_tecnico(IN p_codigo_tecnico integer, IN p_codigo_empresa integer)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+
+	DELETE FROM tb_cad_tecnico
+	WHERE 	codigo = p_codigo_tecnico
+	AND		codigo_empresa = p_codigo_empresa;
+ 
+END;
+$$;
+
+
+ALTER PROCEDURE public.sp_cadastro_delete_tecnico(IN p_codigo_tecnico integer, IN p_codigo_empresa integer) OWNER TO postgres;
+
+--
+-- Name: sp_cadastro_upsert_tecnico(integer, integer, character varying, boolean); Type: PROCEDURE; Schema: public; Owner: postgres
+--
+
+CREATE PROCEDURE public.sp_cadastro_upsert_tecnico(IN p_codigo_tecnico integer, IN p_codigo_empresa integer, IN p_nome character varying, IN p_ativo boolean)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+
+  -- Faz o UPSERT: insere um novo item ou atualiza o existente com base no conflito
+  INSERT INTO tb_cad_tecnico (
+    codigo,
+    codigo_empresa,
+    nome,
+    ativo,
+	data_input
+  ) VALUES (
+    p_codigo_tecnico,
+    p_codigo_empresa,
+    p_nome,
+    p_ativo, 
+    now()
+  )
+  ON CONFLICT (codigo, codigo_empresa)
+  DO UPDATE SET
+    nome       = EXCLUDED.nome,
+    ativo 	   = EXCLUDED.ativo;
+END;
+$$;
+
+
+ALTER PROCEDURE public.sp_cadastro_upsert_tecnico(IN p_codigo_tecnico integer, IN p_codigo_empresa integer, IN p_nome character varying, IN p_ativo boolean) OWNER TO postgres;
 
 --
 -- Name: sp_deletar_parceiro_negocio(integer, integer); Type: PROCEDURE; Schema: public; Owner: postgres
@@ -895,8 +970,9 @@ ALTER SEQUENCE public.tb_cad_parceiro_negocio_id_seq OWNED BY public.tb_cad_parc
 CREATE TABLE public.tb_cad_tecnico (
     codigo integer NOT NULL,
     nome character varying(255) NOT NULL,
-    codigo_empresa integer,
-    ativo boolean
+    codigo_empresa integer NOT NULL,
+    ativo boolean,
+    data_input date
 );
 
 
@@ -1210,7 +1286,7 @@ ALTER TABLE ONLY public.tb_cad_parceiro_negocio
 --
 
 ALTER TABLE ONLY public.tb_cad_tecnico
-    ADD CONSTRAINT tb_cad_tecnico_pkey PRIMARY KEY (codigo);
+    ADD CONSTRAINT tb_cad_tecnico_pkey PRIMARY KEY (codigo, codigo_empresa);
 
 
 --

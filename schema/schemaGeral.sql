@@ -1071,6 +1071,83 @@ CREATE TABLE public.tb_manutencao_agendamento (
 ALTER TABLE public.tb_manutencao_agendamento OWNER TO postgres;
 
 --
+-- Name: tb_manutencao_necessidade; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tb_manutencao_necessidade (
+    codigo bigint NOT NULL,
+    codigo_empresa integer NOT NULL,
+    solicitante character varying,
+    aprovador character varying,
+    descricao text,
+    observacao text,
+    codigo_parceiro_negocio integer,
+    nome_contato character varying,
+    metodo_contato character varying,
+    data_input date,
+    data_ultima_alteracao date,
+    codigo_usuario_ultima_alteracao integer,
+    codigo_stc_tipo_manutencao integer,
+    codigo_stc_nivel_prioridade integer,
+    desconto_bruto_geral numeric,
+    acrescimo_bruto_geral numeric
+);
+
+
+ALTER TABLE public.tb_manutencao_necessidade OWNER TO postgres;
+
+--
+-- Name: tb_manutencao_necessidade_ativo; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tb_manutencao_necessidade_ativo (
+    codigo bigint NOT NULL,
+    codigo_necessidade_manutencao bigint NOT NULL,
+    codigo_empresa integer NOT NULL,
+    codigo_ativo bigint,
+    descricao text,
+    observacao text
+);
+
+
+ALTER TABLE public.tb_manutencao_necessidade_ativo OWNER TO postgres;
+
+--
+-- Name: tb_manutencao_necessidade_ativo_imagem; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tb_manutencao_necessidade_ativo_imagem (
+    codigo bigint NOT NULL,
+    codigo_ativo_vinculado bigint NOT NULL,
+    codigo_necessidade_manutencao bigint NOT NULL,
+    codigo_empresa integer NOT NULL,
+    titulo character varying,
+    caminho_completo character varying,
+    data_input date
+);
+
+
+ALTER TABLE public.tb_manutencao_necessidade_ativo_imagem OWNER TO postgres;
+
+--
+-- Name: tb_manutencao_necessidade_ativo_item; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tb_manutencao_necessidade_ativo_item (
+    codigo bigint NOT NULL,
+    codigo_ativo_vinculado bigint NOT NULL,
+    codigo_necessidade_manutencao bigint NOT NULL,
+    codigo_empresa integer NOT NULL,
+    codigo_item_estoque bigint,
+    custo_base numeric,
+    quantidade numeric,
+    valor_unitario numeric
+);
+
+
+ALTER TABLE public.tb_manutencao_necessidade_ativo_item OWNER TO postgres;
+
+--
 -- Name: tb_manutencao_ordem_servico; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -1314,6 +1391,38 @@ ALTER TABLE ONLY public.tb_manutencao_agendamento
 
 
 --
+-- Name: tb_manutencao_necessidade_ativo_imagem tb_manutencao_necessidade_ativo_imagem_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_manutencao_necessidade_ativo_imagem
+    ADD CONSTRAINT tb_manutencao_necessidade_ativo_imagem_pkey PRIMARY KEY (codigo, codigo_ativo_vinculado, codigo_necessidade_manutencao, codigo_empresa);
+
+
+--
+-- Name: tb_manutencao_necessidade_ativo_item tb_manutencao_necessidade_ativo_item_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_manutencao_necessidade_ativo_item
+    ADD CONSTRAINT tb_manutencao_necessidade_ativo_item_pkey PRIMARY KEY (codigo, codigo_ativo_vinculado, codigo_necessidade_manutencao, codigo_empresa);
+
+
+--
+-- Name: tb_manutencao_necessidade_ativo tb_manutencao_necessidade_ativo_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_manutencao_necessidade_ativo
+    ADD CONSTRAINT tb_manutencao_necessidade_ativo_pkey PRIMARY KEY (codigo, codigo_necessidade_manutencao, codigo_empresa);
+
+
+--
+-- Name: tb_manutencao_necessidade tb_manutencao_necessidade_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_manutencao_necessidade
+    ADD CONSTRAINT tb_manutencao_necessidade_pkey PRIMARY KEY (codigo, codigo_empresa);
+
+
+--
 -- Name: tb_manutencao_ordem_servico_ativo tb_manutencao_ordem_servico_ativo_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1406,6 +1515,30 @@ ALTER TABLE ONLY public.tb_agendamento_ativo
 
 ALTER TABLE ONLY public.tb_cad_item
     ADD CONSTRAINT tb_cad_item_codigo_empresa_fkey FOREIGN KEY (codigo_empresa) REFERENCES public.tb_info_empresa(codigo);
+
+
+--
+-- Name: tb_manutencao_necessidade_ativo_item tb_manutencao_necessidade_at_codigo_ativo_vinculado_codig_fkey1; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_manutencao_necessidade_ativo_item
+    ADD CONSTRAINT tb_manutencao_necessidade_at_codigo_ativo_vinculado_codig_fkey1 FOREIGN KEY (codigo_ativo_vinculado, codigo_necessidade_manutencao, codigo_empresa) REFERENCES public.tb_manutencao_necessidade_ativo(codigo, codigo_necessidade_manutencao, codigo_empresa);
+
+
+--
+-- Name: tb_manutencao_necessidade_ativo_imagem tb_manutencao_necessidade_ati_codigo_ativo_vinculado_codig_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_manutencao_necessidade_ativo_imagem
+    ADD CONSTRAINT tb_manutencao_necessidade_ati_codigo_ativo_vinculado_codig_fkey FOREIGN KEY (codigo_ativo_vinculado, codigo_necessidade_manutencao, codigo_empresa) REFERENCES public.tb_manutencao_necessidade_ativo(codigo, codigo_necessidade_manutencao, codigo_empresa);
+
+
+--
+-- Name: tb_manutencao_necessidade_ativo tb_manutencao_necessidade_ati_codigo_necessidade_manutenca_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_manutencao_necessidade_ativo
+    ADD CONSTRAINT tb_manutencao_necessidade_ati_codigo_necessidade_manutenca_fkey FOREIGN KEY (codigo_necessidade_manutencao, codigo_empresa) REFERENCES public.tb_manutencao_necessidade(codigo, codigo_empresa);
 
 
 --

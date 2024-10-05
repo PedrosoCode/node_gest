@@ -541,6 +541,46 @@ $$;
 ALTER PROCEDURE public.sp_manutencao_ordem_servico_upsert_item(IN p_codigo_empresa integer, IN p_codigo_os bigint, IN p_codigo_item bigint, IN p_codigo_item_estoque integer, IN p_valor_unitario double precision, IN p_quantidade numeric, IN p_codigo_usuario_ultima_alteracao bigint) OWNER TO postgres;
 
 --
+-- Name: sp_necessidade_manutencao_insert(integer, character varying, character varying, character varying, integer, character varying, character varying, integer); Type: PROCEDURE; Schema: public; Owner: postgres
+--
+
+CREATE PROCEDURE public.sp_necessidade_manutencao_insert(IN p_codigo_empresa integer, IN p_solicitante character varying, IN p_descricao character varying, IN p_observacao character varying, IN p_codigo_parceiro_negocio integer, IN p_nome_contato character varying, IN p_metodo_contato character varying, IN p_codigo_usuario integer)
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    v_codigo integer;
+BEGIN
+    SELECT COALESCE(MAX(codigo), 0) + 1 INTO v_codigo FROM tb_manutencao_necessidade WHERE codigo_empresa = p_codigo_empresa;
+
+    INSERT INTO tb_manutencao_necessidade (
+        codigo,
+        codigo_empresa,
+        solicitante,
+		descricao,
+		observacao,
+		codigo_parceiro_negocio,
+		nome_contato,
+		metodo_contato,
+		data_input,
+		codigo_usuario_ultima_alteracao
+    ) VALUES (
+		v_codigo,
+		p_codigo_empresa,
+		p_solicitante,
+		p_descricao,
+		p_observacao,
+		p_codigo_parceiro_negocio,
+		p_nome_contato,
+		p_metodo_contato,
+		p_codigo_usuario
+    );
+END;
+$$;
+
+
+ALTER PROCEDURE public.sp_necessidade_manutencao_insert(IN p_codigo_empresa integer, IN p_solicitante character varying, IN p_descricao character varying, IN p_observacao character varying, IN p_codigo_parceiro_negocio integer, IN p_nome_contato character varying, IN p_metodo_contato character varying, IN p_codigo_usuario integer) OWNER TO postgres;
+
+--
 -- Name: sp_ordem_servico_insert_os(integer, integer, bigint, text, date, date, bigint); Type: FUNCTION; Schema: public; Owner: postgres
 --
 

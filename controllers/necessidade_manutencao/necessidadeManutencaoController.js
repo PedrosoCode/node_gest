@@ -1,5 +1,6 @@
 const sequelize = require('../../config/db');
 const decodeJWT = require('../../utils/jwtDecode');
+const path = require('path');
 
 const novaNM = async (req, res) => {
   try {
@@ -44,14 +45,67 @@ const novaNM = async (req, res) => {
       }
     });
 
-    res.status(201).send('operação realizada com sucesso');
+    res.status(201).send('Operação realizada com sucesso');
   } catch (err) {
     console.error('Erro ao realizar operação:', err.message);
     res.status(500).send('Erro no servidor');
   }
 };
 
+// Função para upload de foto de ativo
+const uploadFoto = async (req, res) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const decoded = decodeJWT(token);
+
+    if (!decoded) {
+      return res.status(401).send('Token inválido ou expirado');
+    }
+
+    const { body_codigo_imagem,
+            body_codigo_ativo_vinculado,
+            body_codigo_nm,
+            body_titulo,
+    } = req.body; 
+    const jwt_codigo_empresa = decoded.codigo_empresa;
+
+    // Validação se o arquivo foi carregado corretamente
+    if (!req.file) {
+      return res.status(400).send('Nenhum arquivo foi enviado.');
+    }
+
+    const nomeArquivo = req.file.filename;
+    const caminhoCompleto = path.resolve('uploads/manutencao', nomeArquivo);
+
+    // Chamada ao procedimento armazenado para inserir a foto
+    await sequelize.query(`
+      CALL sp_manutencao_necessidade_upsert_ativo_imagem(
+        :p_codigo                 ::INTEGER,
+        :p_codigo_ativo_vinculado ::BIGINT,
+        :p_codigo_nm              ::BIGINT,
+        :p_codigo_empresa         ::INTEGER,
+        :p_titulo                 ::VARCHAR,
+        :p_caminho                ::VARCHAR
+      )
+    `, {
+      replacements: {
+        p_codigo                  : body_codigo_imagem          ,
+        p_codigo_ativo_vinculado  : body_codigo_ativo_vinculado ,
+        p_codigo_nm               : body_codigo_nm              ,
+        p_codigo_empresa          : jwt_codigo_empresa          ,
+        p_titulo                  : body_titulo                 ,
+        p_caminho                 : caminhoCompleto             ,
+      }
+    });
+
+    res.status(200).send('Foto enviada com sucesso');
+  } catch (err) {
+    console.error('Erro ao fazer upload das fotos:', err.message);
+    res.status(500).send('Erro ao fazer upload das fotos');
+  }
+};
 
 module.exports = {
-    novaNM,
+  novaNM,
+  uploadFoto,
 };

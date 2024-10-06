@@ -463,6 +463,43 @@ $$;
 ALTER PROCEDURE public.sp_insert_cadastro_basico_parceiro_negocio(IN nome_razao_social character varying, IN is_cnpj boolean, IN documento character varying, IN endereco character varying, IN cidade character varying, IN estado character varying, IN cep character varying, IN telefone character varying, IN email character varying, IN tipo_parceiro character varying, IN p_codigo_empresa integer) OWNER TO postgres;
 
 --
+-- Name: sp_manutencao_necessidade_upsert_ativo_imagem(integer, bigint, bigint, integer, character varying, character varying); Type: PROCEDURE; Schema: public; Owner: postgres
+--
+
+CREATE PROCEDURE public.sp_manutencao_necessidade_upsert_ativo_imagem(IN p_codigo integer, IN p_codigo_ativo_vinculado bigint, IN p_codigo_nm bigint, IN p_codigo_empresa integer, IN p_titulo character varying, IN p_caminho character varying)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+
+  -- Faz o UPSERT: insere um novo item ou atualiza o existente com base no conflito
+  INSERT INTO tb_manutencao_necessidade_ativo_imagem (
+    codigo,
+	codigo_ativo_vinculado,
+	codigo_necessidade_manutencao,
+	codigo_empresa,
+	titulo,
+	caminho_completo,
+	data_input
+  ) VALUES (
+    p_codigo,
+	p_codigo_ativo_vinculado,
+	p_codigo_nm,
+	p_codigo_empresa,
+	p_titulo,
+	p_caminho,
+	now()
+  )
+  ON CONFLICT (codigo, codigo_ativo_vinculado, codigo_necessidade_manutencao, codigo_empresa)
+  DO UPDATE SET
+    titulo      = EXCLUDED.titulo,
+    data_input  = NOW();
+END;
+$$;
+
+
+ALTER PROCEDURE public.sp_manutencao_necessidade_upsert_ativo_imagem(IN p_codigo integer, IN p_codigo_ativo_vinculado bigint, IN p_codigo_nm bigint, IN p_codigo_empresa integer, IN p_titulo character varying, IN p_caminho character varying) OWNER TO postgres;
+
+--
 -- Name: sp_manutencao_ordem_servico_delete_item(bigint, integer, integer); Type: PROCEDURE; Schema: public; Owner: postgres
 --
 

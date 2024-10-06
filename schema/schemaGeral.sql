@@ -572,6 +572,7 @@ BEGIN
 		p_codigo_parceiro_negocio,
 		p_nome_contato,
 		p_metodo_contato,
+		now(),
 		p_codigo_usuario
     );
 END;

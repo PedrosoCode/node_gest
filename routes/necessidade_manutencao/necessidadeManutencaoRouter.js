@@ -5,6 +5,6 @@ const {
 
 const router = express.Router();
 
-router.post('/necessidade_anutencao/criar', novaNM);
+router.post('/necessidade_manutencao/criar', novaNM);
 
 module.exports = router;

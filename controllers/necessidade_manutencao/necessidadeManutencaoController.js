@@ -21,12 +21,12 @@ const novaNM = async (req, res) => {
     const jwt_codigo_usuario = decoded.id;
 
     await sequelize.query(`
-      CALL sp_cadastro_upsert_tecnico(
+      CALL sp_necessidade_manutencao_insert(
         :p_codigo_empresa           ::integer,
         :p_solicitante	            ::varchar,
-        :p_descricao		        ::varchar
-        :p_observacao		        ::varchar
-        :p_codigo_parceiro_negocio  ::integer
+        :p_descricao		            ::varchar,
+        :p_observacao		            ::varchar,
+        :p_codigo_parceiro_negocio  ::integer,
         :p_nome_contato             ::varchar,
         :p_metodo_contato           ::varchar,
         :p_codigo_usuario           ::integer

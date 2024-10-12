@@ -476,7 +476,6 @@ BEGIN
  	SELECT COALESCE(MAX(codigo), 0) + 1 INTO v_codigo_foto FROM tb_manutencao_necessidade_ativo_imagem 
     WHERE codigo_empresa = p_codigo_empresa;
 
-  -- Faz o UPSERT: insere um novo item ou atualiza o existente com base no conflito
   INSERT INTO tb_manutencao_necessidade_ativo_imagem (
     codigo,
 	codigo_ativo_vinculado,
@@ -1200,7 +1199,8 @@ CREATE TABLE public.tb_manutencao_necessidade (
     codigo_stc_tipo_manutencao integer,
     codigo_stc_nivel_prioridade integer,
     desconto_bruto_geral numeric,
-    acrescimo_bruto_geral numeric
+    acrescimo_bruto_geral numeric,
+    codigo_stc_status_nm integer
 );
 
 
@@ -1256,6 +1256,39 @@ CREATE TABLE public.tb_manutencao_necessidade_ativo_item (
 
 
 ALTER TABLE public.tb_manutencao_necessidade_ativo_item OWNER TO postgres;
+
+--
+-- Name: tb_manutencao_necessidade_checklist; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tb_manutencao_necessidade_checklist (
+    codigo bigint NOT NULL,
+    codigo_nm bigint NOT NULL,
+    codigo_empresa integer NOT NULL,
+    is_completa boolean,
+    titulo_checklist character varying,
+    observacao_checklist text
+);
+
+
+ALTER TABLE public.tb_manutencao_necessidade_checklist OWNER TO postgres;
+
+--
+-- Name: tb_manutencao_necessidade_checklist_item; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tb_manutencao_necessidade_checklist_item (
+    codigo integer NOT NULL,
+    codigo_checklist bigint NOT NULL,
+    codigo_nm bigint,
+    codigo_empresa integer NOT NULL,
+    titulo character varying,
+    descricao text,
+    is_atendido boolean
+);
+
+
+ALTER TABLE public.tb_manutencao_necessidade_checklist_item OWNER TO postgres;
 
 --
 -- Name: tb_manutencao_ordem_servico; Type: TABLE; Schema: public; Owner: postgres
@@ -1356,6 +1389,18 @@ ALTER SEQUENCE public.tb_stc_nivel_prioridade_codigo_seq OWNER TO postgres;
 
 ALTER SEQUENCE public.tb_stc_nivel_prioridade_codigo_seq OWNED BY public.tb_stc_nivel_prioridade.codigo;
 
+
+--
+-- Name: tb_stc_status_nm; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tb_stc_status_nm (
+    codigo integer,
+    descricao character varying
+);
+
+
+ALTER TABLE public.tb_stc_status_nm OWNER TO postgres;
 
 --
 -- Name: tb_stc_tipo_manutencao; Type: TABLE; Schema: public; Owner: postgres
@@ -1525,6 +1570,22 @@ ALTER TABLE ONLY public.tb_manutencao_necessidade_ativo
 
 
 --
+-- Name: tb_manutencao_necessidade_checklist_item tb_manutencao_necessidade_checklist_item_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_manutencao_necessidade_checklist_item
+    ADD CONSTRAINT tb_manutencao_necessidade_checklist_item_pkey PRIMARY KEY (codigo, codigo_checklist, codigo_empresa);
+
+
+--
+-- Name: tb_manutencao_necessidade_checklist tb_manutencao_necessidade_checklist_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_manutencao_necessidade_checklist
+    ADD CONSTRAINT tb_manutencao_necessidade_checklist_pkey PRIMARY KEY (codigo, codigo_nm, codigo_empresa);
+
+
+--
 -- Name: tb_manutencao_necessidade tb_manutencao_necessidade_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1601,6 +1662,22 @@ ALTER TABLE ONLY public.tb_cad_ativo_foto
 
 ALTER TABLE ONLY public.tb_manutencao_ordem_servico_item
     ADD CONSTRAINT fk_constraint_os_item FOREIGN KEY (codigo_empresa, codigo_ordem_servico) REFERENCES public.tb_manutencao_ordem_servico(codigo_empresa, codigo) ON DELETE CASCADE;
+
+
+--
+-- Name: tb_manutencao_necessidade_checklist fk_manutencao_checklist; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_manutencao_necessidade_checklist
+    ADD CONSTRAINT fk_manutencao_checklist FOREIGN KEY (codigo_nm, codigo_empresa) REFERENCES public.tb_manutencao_necessidade(codigo, codigo_empresa);
+
+
+--
+-- Name: tb_manutencao_necessidade_checklist_item fk_manutencao_checklist_item; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_manutencao_necessidade_checklist_item
+    ADD CONSTRAINT fk_manutencao_checklist_item FOREIGN KEY (codigo_checklist, codigo_nm, codigo_empresa) REFERENCES public.tb_manutencao_necessidade_checklist(codigo, codigo_nm, codigo_empresa);
 
 
 --

@@ -52,6 +52,38 @@ const novaNM = async (req, res) => {
   }
 };
 
+const deletarNM = async (req, res) => {
+  try {
+    // Decodificar o token JWT para obter o código da empresa
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const decoded = decodeJWT(token);
+
+    if (!decoded) {
+      return res.status(401).send('Token inválido ou expirado');
+    }
+
+    const { body_codigo_nm } = req.body;
+    const jwt_codigo_empresa = decoded.codigo_empresa;
+
+    await sequelize.query(`
+      CALL sp_necessidade_manutencao_delete_nm(
+        :p_codigo_nm           ::integer,
+        :p_codigo_empresa	     ::integer
+      )
+    `, {
+      replacements: {
+        p_codigo_empresa  :  jwt_codigo_empresa ,
+        p_codigo_nm       :  body_codigo_nm     ,
+      }
+    });
+
+    res.status(201).send('Operação realizada com sucesso');
+  } catch (err) {
+    console.error('Erro ao realizar delete:', err.message);
+    res.status(500).send('Erro no servidor');
+  }
+};
+
 //REVIEW - Testar
 const atualizarNM = async (req, res) => {
   try {
@@ -176,4 +208,5 @@ module.exports = {
   novaNM,
   uploadFoto,
   atualizarNM,
+  deletarNM,
 };

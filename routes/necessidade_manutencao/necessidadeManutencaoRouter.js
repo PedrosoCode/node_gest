@@ -11,6 +11,7 @@ const upload = require('../../middlewares/midMulterManutencao');
 
 router.post('/necessidade_manutencao/criar', novaNM);
 router.put('/necessidade_manutencao/atualizar', atualizarNM);
-router.post('/ativos/:codigo_nm/foto', upload.single('file'), uploadFoto);
+// router.delete('/necessidade_manutencao/deletar', deletarNM);
+router.post('/necessidade_manutencao/upload/foto', upload.single('file'), uploadFoto);
 
 module.exports = router;

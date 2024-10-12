@@ -132,8 +132,7 @@ const uploadFoto = async (req, res) => {
       return res.status(401).send('Token inválido ou expirado');
     }
 
-    const { body_codigo_imagem,
-            body_codigo_ativo_vinculado,
+    const { body_codigo_ativo_vinculado,
             body_codigo_nm,
             body_titulo,
     } = req.body; 
@@ -149,8 +148,7 @@ const uploadFoto = async (req, res) => {
 
     // Chamada ao procedimento armazenado para inserir a foto
     await sequelize.query(`
-      CALL sp_manutencao_necessidade_upsert_ativo_imagem(
-        :p_codigo                 ::INTEGER,
+      CALL sp_manutencao_necessidade_insert_ativo_imagem(
         :p_codigo_ativo_vinculado ::BIGINT,
         :p_codigo_nm              ::BIGINT,
         :p_codigo_empresa         ::INTEGER,
@@ -159,7 +157,6 @@ const uploadFoto = async (req, res) => {
       )
     `, {
       replacements: {
-        p_codigo                  : body_codigo_imagem          ,
         p_codigo_ativo_vinculado  : body_codigo_ativo_vinculado ,
         p_codigo_nm               : body_codigo_nm              ,
         p_codigo_empresa          : jwt_codigo_empresa          ,

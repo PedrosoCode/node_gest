@@ -84,7 +84,6 @@ const deletarNM = async (req, res) => {
   }
 };
 
-//REVIEW - Testar
 const atualizarNM = async (req, res) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
@@ -103,7 +102,7 @@ const atualizarNM = async (req, res) => {
             body_codigo_parceiro_negocio ,
             body_nome_contato            ,
             body_metodo_contato          ,
-            body_codigo_tpo_manutencao   ,
+            body_codigo_tipo_manutencao   ,
             body_codigo_nivel_prioridade ,
             body_desconto_bruto_geral    ,
             body_acrescimo_bruto_geral   ,
@@ -114,7 +113,7 @@ const atualizarNM = async (req, res) => {
     await sequelize.query(`
       CALL sp_necessidade_manutencao_update(
         :p_codigo_nm                ::BIGINT,
-        :p_codigo_empresa           ::VARCHAR,
+        :p_codigo_empresa           ::INT,
         :p_solicitante              ::VARCHAR,
         :p_aprovador                ::VARCHAR,
         :p_descricao                ::TEXT,
@@ -123,7 +122,7 @@ const atualizarNM = async (req, res) => {
         :p_nome_contato             ::VARCHAR,
         :p_metodo_contato           ::VARCHAR,
         :p_codigo_usuario           ::INTEGER,
-        :p_codigo_tpo_manutencao    ::INTEGER,
+        :p_codigo_tipo_manutencao   ::INTEGER,
         :p_codigo_nivel_prioridade  ::INTEGER,
         :p_desconto_bruto_geral     ::NUMERIC,
         :p_acrescimo_bruto_geral    ::NUMERIC
@@ -140,7 +139,7 @@ const atualizarNM = async (req, res) => {
         p_nome_contato             : body_nome_contato            ,
         p_metodo_contato           : body_metodo_contato          ,
         p_codigo_usuario           : jwt_codigo_usuario           ,
-        p_codigo_tpo_manutencao    : body_codigo_tpo_manutencao   ,
+        p_codigo_tipo_manutencao   : body_codigo_tipo_manutencao  ,
         p_codigo_nivel_prioridade  : body_codigo_nivel_prioridade ,
         p_desconto_bruto_geral     : body_desconto_bruto_geral    ,
         p_acrescimo_bruto_geral    : body_acrescimo_bruto_geral   ,

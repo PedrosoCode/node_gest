@@ -636,10 +636,10 @@ $$;
 ALTER PROCEDURE public.sp_necessidade_manutencao_insert(IN p_codigo_empresa integer, IN p_solicitante character varying, IN p_descricao character varying, IN p_observacao character varying, IN p_codigo_parceiro_negocio integer, IN p_nome_contato character varying, IN p_metodo_contato character varying, IN p_codigo_usuario integer) OWNER TO postgres;
 
 --
--- Name: sp_necessidade_manutencao_update(bigint, character varying, character varying, character varying, text, text, integer, character varying, character varying, integer, integer, integer, numeric, numeric); Type: PROCEDURE; Schema: public; Owner: postgres
+-- Name: sp_necessidade_manutencao_update(bigint, integer, character varying, character varying, text, text, integer, character varying, character varying, integer, integer, integer, numeric, numeric); Type: PROCEDURE; Schema: public; Owner: postgres
 --
 
-CREATE PROCEDURE public.sp_necessidade_manutencao_update(IN p_codigo_nm bigint, IN p_codigo_empresa character varying, IN p_solicitante character varying, IN p_aprovador character varying, IN p_descricao text, IN p_observacao text, IN p_codigo_parceiro_negocio integer, IN p_nome_contato character varying, IN p_metodo_contato character varying, IN p_codigo_usuario integer, IN p_codigo_tpo_manutencao integer, IN p_codigo_nivel_prioridade integer, IN p_desconto_bruto_geral numeric, IN p_acrescimo_bruto_geral numeric)
+CREATE PROCEDURE public.sp_necessidade_manutencao_update(IN p_codigo_nm bigint, IN p_codigo_empresa integer, IN p_solicitante character varying, IN p_aprovador character varying, IN p_descricao text, IN p_observacao text, IN p_codigo_parceiro_negocio integer, IN p_nome_contato character varying, IN p_metodo_contato character varying, IN p_codigo_usuario integer, IN p_codigo_tipo_manutencao integer, IN p_codigo_nivel_prioridade integer, IN p_desconto_bruto_geral numeric, IN p_acrescimo_bruto_geral numeric)
     LANGUAGE plpgsql
     AS $$
 BEGIN
@@ -654,7 +654,7 @@ BEGIN
 		metodo_contato = p_metodo_contato,
 		data_ultima_alteracao = NOW(),
 		codigo_usuario_ultima_alteracao = p_codigo_usuario,
-		codigo_stc_tipo_manutencao = p_codigo_tpo_manutencao,
+		codigo_stc_tipo_manutencao = p_codigo_tipo_manutencao,
 		codigo_stc_nivel_prioridade = p_codigo_nivel_prioridade,
 		desconto_bruto_geral = p_desconto_bruto_geral,
 		acrescimo_bruto_geral = p_acrescimo_bruto_geral
@@ -664,7 +664,7 @@ END;
 $$;
 
 
-ALTER PROCEDURE public.sp_necessidade_manutencao_update(IN p_codigo_nm bigint, IN p_codigo_empresa character varying, IN p_solicitante character varying, IN p_aprovador character varying, IN p_descricao text, IN p_observacao text, IN p_codigo_parceiro_negocio integer, IN p_nome_contato character varying, IN p_metodo_contato character varying, IN p_codigo_usuario integer, IN p_codigo_tpo_manutencao integer, IN p_codigo_nivel_prioridade integer, IN p_desconto_bruto_geral numeric, IN p_acrescimo_bruto_geral numeric) OWNER TO postgres;
+ALTER PROCEDURE public.sp_necessidade_manutencao_update(IN p_codigo_nm bigint, IN p_codigo_empresa integer, IN p_solicitante character varying, IN p_aprovador character varying, IN p_descricao text, IN p_observacao text, IN p_codigo_parceiro_negocio integer, IN p_nome_contato character varying, IN p_metodo_contato character varying, IN p_codigo_usuario integer, IN p_codigo_tipo_manutencao integer, IN p_codigo_nivel_prioridade integer, IN p_desconto_bruto_geral numeric, IN p_acrescimo_bruto_geral numeric) OWNER TO postgres;
 
 --
 -- Name: sp_ordem_servico_insert_os(integer, integer, bigint, text, date, date, bigint); Type: FUNCTION; Schema: public; Owner: postgres

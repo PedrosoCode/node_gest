@@ -203,9 +203,48 @@ const uploadFoto = async (req, res) => {
   }
 };
 
+const carregarDadosNM = async (req, res) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const decoded = decodeJWT(token);
+
+    if (!decoded) {
+      return res.status(401).send('Token inválido ou expirado');
+    }
+
+    const jwt_codigo_empresa = decoded.codigo_empresa;
+    const { body_codigo_nm } = req.body;
+
+    const [dados_nm] = await sequelize.query(
+      `SELECT * FROM fn_manutencao_necessidade_listar_dados_nm(
+        :p_codigo_nm        ::INT, 
+        :p_codigo_empresa   ::INT
+      )`, 
+      {
+        replacements: {
+          p_codigo_empresa  : jwt_codigo_empresa,
+          p_codigo_nm       : body_codigo_nm
+        },
+      }
+    );  
+    
+    console.log('dados retornados:', dados_nm);
+
+    if (!dados_nm || dados_nm.length === 0) {
+      return res.status(404).send('Nenhum dado encontrado para essa OS.');
+    }
+
+    res.json(dados_nm); 
+  } catch (err) {
+    console.error('Erro ao listar dados_nm:', err.message);
+    res.status(500).send('Erro no servidor');
+  }
+};
+
 module.exports = {
   novaNM,
   uploadFoto,
   atualizarNM,
   deletarNM,
+  carregarDadosNM,
 };

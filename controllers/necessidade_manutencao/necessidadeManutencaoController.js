@@ -241,10 +241,56 @@ const carregarDadosNM = async (req, res) => {
   }
 };
 
+const upsertAtivoNm = async (req, res) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const decoded = decodeJWT(token);
+
+    if (!decoded) {
+      return res.status(401).send('Token inválido ou expirado');
+    }
+
+    const {
+      body_codigo_ativo_nm,
+      body_codigo_necessidade_manutencao,
+      body_codigo_ativo_referencia,
+      body_descricao,
+      body_observacao,
+    } = req.body;
+      
+    const jwt_codigo_empresa = decoded.codigo_empresa;
+
+    await sequelize.query(`
+          CALL sp_necessidade_manutencao_upsert_ativo(
+           :p_codigo                          ::BIGINT    ,
+           :p_codigo_necessidade_manutencao   ::BIGINT    ,
+	         :p_codigo_empresa                  ::INT       ,
+	         :p_codigo_ativo                    ::BIGINT    ,
+	         :p_descricao                       ::TEXT      ,
+	         :p_observacao                      ::TEXT)`    , 
+    {
+      replacements: {
+        p_codigo                          : body_codigo_ativo_nm                ,
+        p_codigo_necessidade_manutencao   : body_codigo_necessidade_manutencao  ,
+        p_codigo_empresa                  : jwt_codigo_empresa                  ,
+        p_codigo_ativo                    : body_codigo_ativo_referencia        ,
+        p_descricao                       : body_descricao                      ,
+        p_observacao                      : body_observacao                     ,
+      },
+    });
+
+    res.status(201).send(' upsert do ativo realizado com sucesso');
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
 module.exports = {
   novaNM,
   uploadFoto,
   atualizarNM,
   deletarNM,
   carregarDadosNM,
+  upsertAtivoNm,
 };

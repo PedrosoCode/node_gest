@@ -785,6 +785,43 @@ $$;
 ALTER PROCEDURE public.sp_necessidade_manutencao_update(IN p_codigo_nm bigint, IN p_codigo_empresa integer, IN p_solicitante character varying, IN p_aprovador character varying, IN p_descricao text, IN p_observacao text, IN p_codigo_parceiro_negocio integer, IN p_nome_contato character varying, IN p_metodo_contato character varying, IN p_codigo_usuario integer, IN p_codigo_tipo_manutencao integer, IN p_codigo_nivel_prioridade integer, IN p_desconto_bruto_geral numeric, IN p_acrescimo_bruto_geral numeric) OWNER TO postgres;
 
 --
+-- Name: sp_necessidade_manutencao_upsert_ativo(bigint, bigint, integer, bigint, text, text); Type: PROCEDURE; Schema: public; Owner: postgres
+--
+
+CREATE PROCEDURE public.sp_necessidade_manutencao_upsert_ativo(IN p_codigo bigint, IN p_codigo_necessidade_manutencao bigint, IN p_codigo_empresa integer, IN p_codigo_ativo bigint, IN p_descricao text, IN p_observacao text)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+
+  -- Faz o UPSERT: insere um novo item ou atualiza o existente com base no conflito
+  INSERT INTO tb_manutencao_necessidade_ativo (
+    codigo,
+    codigo_necessidade_manutencao,
+	codigo_empresa,
+	codigo_ativo,
+	descricao,
+	observacao
+  ) VALUES (
+    p_codigo,
+    p_codigo_necessidade_manutencao,
+	p_codigo_empresa,
+	p_codigo_ativo,
+	p_descricao,
+	p_observacao
+  )
+  ON CONFLICT (codigo, codigo_necessidade_manutencao, codigo_empresa)
+  DO UPDATE SET
+    codigo_ativo   = EXCLUDED.codigo_ativo,
+    descricao      = EXCLUDED.descricao,
+    observacao     = EXCLUDED.observacao;
+
+END;
+$$;
+
+
+ALTER PROCEDURE public.sp_necessidade_manutencao_upsert_ativo(IN p_codigo bigint, IN p_codigo_necessidade_manutencao bigint, IN p_codigo_empresa integer, IN p_codigo_ativo bigint, IN p_descricao text, IN p_observacao text) OWNER TO postgres;
+
+--
 -- Name: sp_ordem_servico_insert_os(integer, integer, bigint, text, date, date, bigint); Type: FUNCTION; Schema: public; Owner: postgres
 --
 

@@ -52,8 +52,6 @@ app.use('/api', cadastroTecnico);
           //NOTE - Alteração já feita no banco
           //REVIEW - Refatorar os CRUDS de item
 
-//REVIEW - Analisar para trocar a escala da OS atual que é (N:1) para (N:N) na relação OS x ATIVO (famoso drop column) e refatorar os controladores e procs/fns
-
 // Sincroniza o Sequelize com o banco de dados
 sequelize.sync({ force: false }).then(() => {
   console.log('Database & tables created!');

@@ -124,6 +124,124 @@ $$;
 ALTER FUNCTION public.fn_listar_itens(p_codigo_empresa integer) OWNER TO postgres;
 
 --
+-- Name: fn_manutencao_necessidade_listar_dados_nm(integer, integer); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.fn_manutencao_necessidade_listar_dados_nm(p_codigo_nm integer, p_codigo_empresa integer) RETURNS TABLE(get_codigo_nm bigint, get_codigo_empresa_nm integer, get_solicitante_nm character varying, get_aprovador_nm character varying, get_descricao_nm text, get_observacao_nm text, get_nome_parceiro_negocio_nm character varying, get_nome_contato_nm character varying, get_metodo_contato_nm character varying, get_data_input_nm date, get_data_ultima_alteracao_nm date, get_codigo_tipo_manutencao_nm integer, get_descricao_tipo_manutencao_nm character varying, get_nivel_prioridade_nm integer, get_descricao_nivel_prioridade_nm character varying, get_desconto_bruto_geral numeric, get_acrescimo_bruto_geral numeric, get_codigo_status_nm integer, get_descricao_status_nm character varying)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        tb_manutencao_necessidade.codigo AS get_codigo_nm,
+        tb_manutencao_necessidade.codigo_empresa AS get_codigo_empresa_nm,
+        tb_manutencao_necessidade.solicitante AS get_solicitante_nm,
+        tb_manutencao_necessidade.aprovador AS get_aprovador_nm,
+        tb_manutencao_necessidade.descricao AS get_descricao_nm,
+        tb_manutencao_necessidade.observacao AS get_observacao_nm,
+        tb_cad_parceiro_negocio.nome_razao_social AS get_nome_parceiro_negocio_nm,
+        tb_manutencao_necessidade.nome_contato AS get_nome_contato_nm,
+        tb_manutencao_necessidade.metodo_contato AS get_metodo_contato_nm,
+        tb_manutencao_necessidade.data_input AS get_data_input_nm,
+        tb_manutencao_necessidade.data_ultima_alteracao AS get_data_ultima_alteracao_nm,
+        tb_manutencao_necessidade.codigo_stc_tipo_manutencao AS get_codigo_tipo_manutencao_nm,
+        tb_stc_tipo_manutencao.descricao AS get_descricao_tipo_manutencao_nm,
+        tb_manutencao_necessidade.codigo_stc_nivel_prioridade AS get_nivel_prioridade_nm,
+        tb_stc_nivel_prioridade.nivel AS get_descricao_nivel_prioridade_nm,
+        tb_manutencao_necessidade.desconto_bruto_geral AS get_desconto_bruto_geral,
+        tb_manutencao_necessidade.acrescimo_bruto_geral AS get_acrescimo_bruto_geral,
+        tb_manutencao_necessidade.codigo_stc_status_nm AS get_codigo_status_nm,
+        tb_stc_status_nm.descricao AS get_descricao_status_nm
+    FROM
+        tb_manutencao_necessidade
+    INNER JOIN tb_cad_parceiro_negocio
+        ON tb_cad_parceiro_negocio.codigo = tb_manutencao_necessidade.codigo_parceiro_negocio
+        AND tb_cad_parceiro_negocio.codigo_empresa = tb_manutencao_necessidade.codigo_empresa
+    LEFT JOIN tb_stc_tipo_manutencao
+        ON tb_stc_tipo_manutencao.codigo = tb_manutencao_necessidade.codigo_stc_tipo_manutencao
+    LEFT JOIN tb_stc_nivel_prioridade
+        ON tb_stc_nivel_prioridade.codigo = tb_manutencao_necessidade.codigo_stc_nivel_prioridade
+    LEFT JOIN tb_stc_status_nm
+        ON tb_stc_status_nm.codigo = tb_manutencao_necessidade.codigo_stc_status_nm
+    WHERE
+        tb_manutencao_necessidade.codigo = p_codigo_nm
+        AND tb_manutencao_necessidade.codigo_empresa = p_codigo_empresa;
+END;
+$$;
+
+
+ALTER FUNCTION public.fn_manutencao_necessidade_listar_dados_nm(p_codigo_nm integer, p_codigo_empresa integer) OWNER TO postgres;
+
+--
+-- Name: fn_necessidade_manutencao_load_dados(bigint, integer); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.fn_necessidade_manutencao_load_dados(p_codigo_nm bigint, p_codigo_empresa_nm integer) RETURNS TABLE(get_codigo_nm bigint, get_codigo_empresa integer, get_solicitante character varying, get_aprovador character varying, get_descricao_nm text, get_observacao_nm text, get_codigo_parceiro_negocio integer, get_razao_social character varying, get_is_cnpj boolean, get_documento_parceiro character varying, get_endereco_parceiro character varying, get_cidade_parceiro character varying, get_estado_parceiro character varying, get_cep_parceiro character varying, get_telefone_parceiro character varying, get_email_parceiro character varying, get_nome_contato character varying, get_metodo_contato character varying, get_data_input_nm date, get_data_ultima_alteracao_nm date, get_codigo_usuario_ultima_alteracao integer, get_nome_usuario_alterado_por character varying, get_codigo_tipo_manutencao integer, get_descricao_tipo_manutencao character varying, get_codigo_nivel_prioridade integer, get_nivel_descricao character varying, get_desconto_bruto_geral numeric, get_acrescimo_bruto_geral numeric, get_codigo_status_nm integer, get_descricao_status character varying)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+  	tb_manutencao_necessidade.codigo AS get_codigo_nm,
+  	tb_manutencao_necessidade.codigo_empresa AS get_codigo_empresa_nm,
+  	tb_manutencao_necessidade.solicitante AS get_solicitante,
+  	tb_manutencao_necessidade.aprovador AS get_aprovador,
+  	tb_manutencao_necessidade.descricao AS get_descricao_nm,
+  	tb_manutencao_necessidade.observacao AS get_observacao_nm,
+	--JOINS parceiro
+  	tb_manutencao_necessidade.codigo_parceiro_negocio AS get_codigo_parceiro_negocio,
+  	tb_cad_parceiro_negocio.nome_razao_social AS get_razao_social,
+  	tb_cad_parceiro_negocio.is_cnpj AS get_is_cnpj,
+  	tb_cad_parceiro_negocio.documento AS get_documento_parceiro,
+  	tb_cad_parceiro_negocio.endereco AS get_endereco_parceiro,
+  	tb_cad_parceiro_negocio.cidade AS get_cidade_parceiro,
+  	tb_cad_parceiro_negocio.estado::VARCHAR(2) AS get_estado_parceiro,
+  	tb_cad_parceiro_negocio.cep AS get_cep_parceiro,
+  	tb_cad_parceiro_negocio.telefone AS get_telefone_parceiro,
+  	tb_cad_parceiro_negocio.email AS get_email_parceiro,
+	--FIM dos JOINS parceiro
+  	tb_manutencao_necessidade.nome_contato AS get_nome_contato,
+  	tb_manutencao_necessidade.metodo_contato AS get_metodo_contato,
+  	tb_manutencao_necessidade.data_input AS get_data_input_nm,
+  	tb_manutencao_necessidade.data_ultima_alteracao AS get_data_ultima_alteracao_nm,
+	--JOIN usuário
+  	tb_manutencao_necessidade.codigo_usuario_ultima_alteracao AS get_codigo_usuario_ultima_alteracao,
+  	tb_cad_usuario.usuario AS get_nome_usuario_alterado_por,
+	--JOIN tipo manutencao
+  	tb_manutencao_necessidade.codigo_stc_tipo_manutencao AS get_codigo_tipo_manutencao,
+  	tb_stc_tipo_manutencao.descricao AS get_descricao_tipo_manutencao,
+	--JOIN nivel prioridade
+    tb_manutencao_necessidade.codigo_stc_nivel_prioridade AS get_codigo_nivel_prioridade,
+	tb_stc_nivel_prioridade.nivel AS get_nivel_descricao,
+    tb_manutencao_necessidade.desconto_bruto_geral AS get_desconto_bruto_geral,
+    tb_manutencao_necessidade.acrescimo_bruto_geral AS get_acrescimo_bruto_geral,
+	--JOIN status
+    tb_manutencao_necessidade.codigo_stc_status_nm AS get_codigo_status_nm,
+	tb_stc_status_nm.descricao AS get_descricao_status
+  FROM 
+    tb_manutencao_necessidade
+	INNER JOIN tb_cad_parceiro_negocio
+		ON 	tb_cad_parceiro_negocio.codigo = tb_manutencao_necessidade.codigo_parceiro_negocio
+		AND	tb_manutencao_necessidade.codigo_empresa = tb_manutencao_necessidade.codigo_empresa
+	INNER JOIN tb_cad_usuario
+		ON tb_cad_usuario.codigo = tb_manutencao_necessidade.codigo_usuario_ultima_alteracao
+		AND tb_cad_usuario.codigo_empresa = tb_manutencao_necessidade.codigo_empresa
+	INNER JOIN tb_stc_tipo_manutencao 
+		ON tb_stc_tipo_manutencao.codigo = tb_manutencao_necessidade.codigo_stc_tipo_manutencao
+	INNER JOIN tb_stc_nivel_prioridade
+		ON tb_stc_nivel_prioridade.codigo = tb_manutencao_necessidade.codigo_stc_nivel_prioridade
+	INNER JOIN tb_stc_status_nm
+		ON tb_stc_status_nm.codigo = tb_manutencao_necessidade.codigo_stc_status_nm
+  WHERE tb_manutencao_necessidade.codigo = p_codigo_nm
+    AND tb_manutencao_necessidade.codigo_empresa = p_codigo_empresa_nm;
+
+END;
+$$;
+
+
+ALTER FUNCTION public.fn_necessidade_manutencao_load_dados(p_codigo_nm bigint, p_codigo_empresa_nm integer) OWNER TO postgres;
+
+--
 -- Name: fn_ordem_servico_load_dados(bigint, bigint); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -1412,7 +1530,7 @@ ALTER SEQUENCE public.tb_stc_nivel_prioridade_codigo_seq OWNED BY public.tb_stc_
 --
 
 CREATE TABLE public.tb_stc_status_nm (
-    codigo integer,
+    codigo integer NOT NULL,
     descricao character varying
 );
 
@@ -1424,7 +1542,7 @@ ALTER TABLE public.tb_stc_status_nm OWNER TO postgres;
 --
 
 CREATE TABLE public.tb_stc_tipo_manutencao (
-    codigo integer,
+    codigo integer NOT NULL,
     descricao character varying,
     ativo boolean
 );
@@ -1475,6 +1593,14 @@ ALTER TABLE ONLY public.tb_stc_nivel_prioridade ALTER COLUMN codigo SET DEFAULT 
 
 
 --
+-- Name: tb_stc_status_nm pk_codigo_status_manutencao; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_stc_status_nm
+    ADD CONSTRAINT pk_codigo_status_manutencao PRIMARY KEY (codigo);
+
+
+--
 -- Name: tb_cad_ativo_foto pk_tb_cad_ativo_foto; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1488,6 +1614,14 @@ ALTER TABLE ONLY public.tb_cad_ativo_foto
 
 ALTER TABLE ONLY public.tb_info_empresa
     ADD CONSTRAINT pk_tb_info_empresa PRIMARY KEY (codigo);
+
+
+--
+-- Name: tb_stc_tipo_manutencao pk_tipo_manutencao; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_stc_tipo_manutencao
+    ADD CONSTRAINT pk_tipo_manutencao PRIMARY KEY (codigo);
 
 
 --

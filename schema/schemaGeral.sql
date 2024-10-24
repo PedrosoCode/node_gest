@@ -124,6 +124,44 @@ $$;
 ALTER FUNCTION public.fn_listar_itens(p_codigo_empresa integer) OWNER TO postgres;
 
 --
+-- Name: fn_manutecao_necessidade_select_ativo(integer, integer); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.fn_manutecao_necessidade_select_ativo(p_codigo_empresa integer, p_codigo_nm integer) RETURNS TABLE(get_codigo_ativo_nm bigint, get_codigo_nm bigint, get_codigo_empresa_ativo integer, get_codigo_ativo_referencia bigint, get_descricao_ativo text, get_observacao_ativo text, get_numero_serie_ativo character varying, get_codigo_fabricante_ativo integer, get_modelo_ativo character varying, get_observacao_ativo_referencia character varying, get_nome_fantasia_fabricante character varying, get_razao_social_fabricante character varying, get_descricao_fabricante text)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        tb_manutencao_necessidade_ativo.codigo AS get_codigo_ativo_nm,
+        tb_manutencao_necessidade_ativo.codigo_necessidade_manutencao AS get_codigo_nm,
+        tb_manutencao_necessidade_ativo.codigo_empresa AS get_codigo_empresa_ativo,
+        tb_manutencao_necessidade_ativo.codigo_ativo AS get_codigo_ativo_referencia,
+        tb_manutencao_necessidade_ativo.descricao AS get_descricao_ativo,
+        tb_manutencao_necessidade_ativo.observacao AS get_observacao_ativo,
+        tb_cad_ativo.numero_serie AS get_numero_serie_ativo,
+        tb_cad_ativo.codigo_fabricante AS get_codigo_fabricante_ativo,
+        tb_cad_ativo.modelo AS get_modelo_ativo,
+        tb_cad_ativo.observacao AS get_observacao_ativo_referencia,
+        tb_cad_fabricante.nome_fantasia AS get_nome_fantasia_fabricante,
+        tb_cad_fabricante.razao_social AS get_razao_social_fabricante,
+        tb_cad_fabricante.descricao AS get_descricao_fabricante
+    FROM tb_manutencao_necessidade_ativo
+    LEFT JOIN tb_cad_ativo
+        ON tb_cad_ativo.codigo = tb_manutencao_necessidade_ativo.codigo_ativo
+        AND tb_cad_ativo.codigo_empresa = tb_manutencao_necessidade_ativo.codigo_empresa
+    LEFT JOIN tb_cad_fabricante
+        ON tb_cad_fabricante.codigo = tb_cad_ativo.codigo_fabricante
+        AND tb_cad_fabricante.codigo_empresa = tb_cad_ativo.codigo_empresa
+    WHERE tb_manutencao_necessidade_ativo.codigo_empresa = p_codigo_empresa
+    AND tb_manutencao_necessidade_ativo.codigo_necessidade_manutencao = p_codigo_nm;
+END;
+$$;
+
+
+ALTER FUNCTION public.fn_manutecao_necessidade_select_ativo(p_codigo_empresa integer, p_codigo_nm integer) OWNER TO postgres;
+
+--
 -- Name: fn_manutencao_necessidade_listar_dados_nm(integer, integer); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -1132,11 +1170,8 @@ CREATE TABLE public.tb_cad_ativo (
     numero_serie character varying(255),
     codigo_fabricante integer,
     modelo character varying,
-    codigo_prioridade smallint,
-    codigo_tecnico_responsavel integer,
     observacao character varying,
     data_input date DEFAULT CURRENT_DATE,
-    nivel_manutencao boolean,
     codigo_empresa integer NOT NULL
 );
 
@@ -1159,6 +1194,22 @@ CREATE TABLE public.tb_cad_ativo_foto (
 
 
 ALTER TABLE public.tb_cad_ativo_foto OWNER TO postgres;
+
+--
+-- Name: tb_cad_fabricante; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.tb_cad_fabricante (
+    codigo bigint NOT NULL,
+    codigo_empresa smallint NOT NULL,
+    nome_fantasia character varying,
+    razao_social character varying,
+    descricao text,
+    ativo boolean
+);
+
+
+ALTER TABLE public.tb_cad_fabricante OWNER TO postgres;
 
 --
 -- Name: tb_cad_item; Type: TABLE; Schema: public; Owner: postgres
@@ -1686,6 +1737,14 @@ ALTER TABLE ONLY public.tb_cad_ativo
 
 
 --
+-- Name: tb_cad_fabricante tb_cad_fabricante_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.tb_cad_fabricante
+    ADD CONSTRAINT tb_cad_fabricante_pkey PRIMARY KEY (codigo, codigo_empresa);
+
+
+--
 -- Name: tb_cad_item tb_cad_item_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -1866,14 +1925,6 @@ ALTER TABLE ONLY public.tb_manutencao_necessidade_checklist
 
 ALTER TABLE ONLY public.tb_manutencao_necessidade_checklist_item
     ADD CONSTRAINT fk_manutencao_checklist_item FOREIGN KEY (codigo_checklist, codigo_nm, codigo_empresa) REFERENCES public.tb_manutencao_necessidade_checklist(codigo, codigo_nm, codigo_empresa);
-
-
---
--- Name: tb_cad_ativo fk_tb_cad_ativo_main_tb_stc_nivel_prioridade; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.tb_cad_ativo
-    ADD CONSTRAINT fk_tb_cad_ativo_main_tb_stc_nivel_prioridade FOREIGN KEY (codigo_prioridade) REFERENCES public.tb_stc_nivel_prioridade(codigo);
 
 
 --

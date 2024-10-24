@@ -241,6 +241,44 @@ const carregarDadosNM = async (req, res) => {
   }
 };
 
+const carregarDadosNMativos = async (req, res) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const decoded = decodeJWT(token);
+
+    if (!decoded) {
+      return res.status(401).send('Token inválido ou expirado');
+    }
+
+    const jwt_codigo_empresa = decoded.codigo_empresa;
+    const { body_codigo_nm } = req.body;
+
+    const [dados_nmAtivos] = await sequelize.query(
+      `SELECT * FROM fn_manutecao_necessidade_select_ativo(
+        :p_codigo_empresa   ::INT, 
+        :p_codigo_nm        ::INT
+      )`, 
+      {
+        replacements: {
+          p_codigo_empresa  : jwt_codigo_empresa,
+          p_codigo_nm       : body_codigo_nm
+        },
+      }
+    );  
+    
+    console.log('dados retornados:', dados_nmAtivos);
+
+    if (!dados_nmAtivos || dados_nmAtivos.length === 0) {
+      return res.status(404).send('Nenhum dado encontrado para essa OS.');
+    }
+
+    res.json(dados_nmAtivos); 
+  } catch (err) {
+    console.error('Erro ao listar dados_nmAtivos:', err.message);
+    res.status(500).send('Erro no servidor');
+  }
+};
+
 const upsertAtivoNm = async (req, res) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
@@ -292,5 +330,6 @@ module.exports = {
   atualizarNM,
   deletarNM,
   carregarDadosNM,
+  carregarDadosNMativos,
   upsertAtivoNm,
 };

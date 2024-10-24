@@ -5,6 +5,7 @@ const {
     atualizarNM,
     deletarNM,
     carregarDadosNM,
+    carregarDadosNMativos,
     upsertAtivoNm
 } = require('../../controllers/necessidade_manutencao/necessidadeManutencaoController');
 
@@ -19,5 +20,6 @@ router.post('/necessidade_manutencao/upload/foto', upload.single('file'), upload
 router.get('/necessidade_manutencao/carregarDados', carregarDadosNM);
 
 router.post('/necessidade_manutencao/ativo-upsert', upsertAtivoNm);
+router.get('/necessidade_manutencao/carregarDadosAtivos', carregarDadosNMativos);
 
 module.exports = router;

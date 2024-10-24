@@ -52,6 +52,8 @@ app.use('/api', cadastroTecnico);
           //NOTE - Alteração já feita no banco
           //REVIEW - Refatorar os CRUDS de item
 
+//TODO - CRUD para fabricantes --> Schema já criado no banco
+
 // Sincroniza o Sequelize com o banco de dados
 sequelize.sync({ force: false }).then(() => {
   console.log('Database & tables created!');

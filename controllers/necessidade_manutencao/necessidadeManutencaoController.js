@@ -324,6 +324,43 @@ const upsertAtivoNm = async (req, res) => {
   }
 };
 
+const deletarNMativo = async (req, res) => {
+  try {
+    // Decodificar o token JWT para obter o código da empresa
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const decoded = decodeJWT(token);
+
+    if (!decoded) {
+      return res.status(401).send('Token inválido ou expirado');
+    }
+
+    const { body_codigo_nm,
+            body_codigo_ativo
+    } = req.body;
+
+    const jwt_codigo_empresa = decoded.codigo_empresa;
+
+    await sequelize.query(`
+      CALL sp_necessidade_manutencao_delete_ativo_nm(
+        :p_codigo_ativo        ::bigint,
+        :p_codigo_nm           ::integer,
+        :p_codigo_empresa	     ::integer
+      )
+    `, {
+      replacements: {
+        p_codigo_ativo    :  body_codigo_ativo  ,
+        p_codigo_empresa  :  jwt_codigo_empresa ,
+        p_codigo_nm       :  body_codigo_nm     ,
+      }
+    });
+
+    res.status(201).send('Operação realizada com sucesso');
+  } catch (err) {
+    console.error('Erro ao realizar delete de ativo:', err.message);
+    res.status(500).send('Erro no servidor');
+  }
+};
+
 module.exports = {
   novaNM,
   uploadFoto,
@@ -332,4 +369,5 @@ module.exports = {
   carregarDadosNM,
   carregarDadosNMativos,
   upsertAtivoNm,
+  deletarNMativo,
 };

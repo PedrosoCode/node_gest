@@ -6,7 +6,8 @@ const {
     deletarNM,
     carregarDadosNM,
     carregarDadosNMativos,
-    upsertAtivoNm
+    upsertAtivoNm,
+    deletarNMativo
 } = require('../../controllers/necessidade_manutencao/necessidadeManutencaoController');
 
 const router = express.Router();
@@ -21,5 +22,6 @@ router.get('/necessidade_manutencao/carregarDados', carregarDadosNM);
 
 router.post('/necessidade_manutencao/ativo-upsert', upsertAtivoNm);
 router.get('/necessidade_manutencao/carregarDadosAtivos', carregarDadosNMativos);
+router.delete('/necessidade_manutencao/deletarAtivo', deletarNMativo);
 
 module.exports = router;

@@ -878,6 +878,48 @@ $$;
 ALTER PROCEDURE public.sp_necessidade_manutencao_upsert_ativo(IN p_codigo bigint, IN p_codigo_necessidade_manutencao bigint, IN p_codigo_empresa integer, IN p_codigo_ativo bigint, IN p_descricao text, IN p_observacao text) OWNER TO postgres;
 
 --
+-- Name: sp_necessidade_manutencao_upsert_ativo_item(bigint, bigint, bigint, integer, bigint, numeric, numeric, character); Type: PROCEDURE; Schema: public; Owner: postgres
+--
+
+CREATE PROCEDURE public.sp_necessidade_manutencao_upsert_ativo_item(IN p_codigo bigint, IN p_codigo_ativo_vinculado bigint, IN p_codigo_necessidade_manutencao bigint, IN p_codigo_empresa integer, IN p_codigo_item_estoque bigint, IN p_quantidade numeric, IN p_valor_unitario numeric, IN p_tipo character)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+
+  -- Faz o UPSERT: insere um novo item ou atualiza o existente com base no conflito
+  INSERT INTO tb_manutencao_necessidade_ativo_item (
+    codigo,
+    codigo_ativo_vinculado,
+	codigo_necessidade_manutencao,
+	codigo_empresa,
+	codigo_item_estoque,
+	quantidade,
+	valor_unitario,
+	tipo
+  ) VALUES (
+    p_codigo,
+    p_codigo_ativo_vinculado,
+	p_codigo_necessidade_manutencao,
+	p_codigo_empresa,
+	p_codigo_item_estoque,
+	p_quantidade,
+	p_valor_unitario,
+	p_tipo
+  )
+  ON CONFLICT (codigo, codigo_ativo_vinculado, codigo_necessidade_manutencao, codigo_empresa)
+  DO UPDATE SET
+    codigo_item_estoque   	= EXCLUDED.codigo_item_estoque,
+    quantidade      		= EXCLUDED.quantidade,
+    valor_unitario     		= EXCLUDED.valor_unitario,
+	tipo 					= EXCLUDED.tipo;
+
+END;
+$$;
+
+
+ALTER PROCEDURE public.sp_necessidade_manutencao_upsert_ativo_item(IN p_codigo bigint, IN p_codigo_ativo_vinculado bigint, IN p_codigo_necessidade_manutencao bigint, IN p_codigo_empresa integer, IN p_codigo_item_estoque bigint, IN p_quantidade numeric, IN p_valor_unitario numeric, IN p_tipo character) OWNER TO postgres;
+
+--
 -- Name: sp_ordem_servico_insert_os(integer, integer, bigint, text, date, date, bigint); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -1490,9 +1532,9 @@ CREATE TABLE public.tb_manutencao_necessidade_ativo_item (
     codigo_necessidade_manutencao bigint NOT NULL,
     codigo_empresa integer NOT NULL,
     codigo_item_estoque bigint,
-    custo_base numeric,
     quantidade numeric,
-    valor_unitario numeric
+    valor_unitario numeric,
+    tipo character(1)
 );
 
 

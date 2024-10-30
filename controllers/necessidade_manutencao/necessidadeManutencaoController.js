@@ -361,6 +361,58 @@ const deletarNMativo = async (req, res) => {
   }
 };
 
+const upsertAtivoNmItem = async (req, res) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const decoded = decodeJWT(token);
+
+    if (!decoded) {
+      return res.status(401).send('Token inválido ou expirado');
+    }
+
+    const {
+      body_codigo_item_nm                , 
+      body_codigo_ativo_vinculado        , 
+      body_codigo_necessidade_manutencao , 
+      body_codigo_item_estoque           ,  
+      body_quantidade                    , 
+      body_valor_unitario                , 
+      body_tipo                          , 
+    } = req.body;
+      
+    const jwt_codigo_empresa = decoded.codigo_empresa;
+
+    await sequelize.query(`
+          CALL sp_necessidade_manutencao_upsert_ativo_item(
+            :p_codigo                         ::BIGINT,
+            :p_codigo_ativo_vinculado         ::BIGINT,
+            :p_codigo_necessidade_manutencao  ::BIGINT,
+            :p_codigo_empresa                 ::INTEGER,
+            :p_codigo_item_estoque            ::BIGINT,
+            :p_quantidade                     ::NUMERIC,
+            :p_valor_unitario                 ::NUMERIC,
+            :p_tipo                           ::CHAR(1)
+            )`, 
+    {
+      replacements: {
+        p_codigo                          : body_codigo_item_nm                ,
+        p_codigo_ativo_vinculado          : body_codigo_ativo_vinculado        ,
+        p_codigo_necessidade_manutencao   : body_codigo_necessidade_manutencao ,                                 
+        p_codigo_empresa                  : jwt_codigo_empresa                 ,                
+        p_codigo_item_estoque             : body_codigo_item_estoque           ,                       
+        p_quantidade                      : body_quantidade                    ,               
+        p_valor_unitario                  : body_valor_unitario                ,                   
+        p_tipo                            : body_tipo                          ,         
+      },
+    });
+
+    res.status(201).send(' upsert dos itens do ativo realizado com sucesso');
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
 module.exports = {
   novaNM,
   uploadFoto,
@@ -370,4 +422,5 @@ module.exports = {
   carregarDadosNMativos,
   upsertAtivoNm,
   deletarNMativo,
+  upsertAtivoNmItem
 };

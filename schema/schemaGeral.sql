@@ -211,6 +211,40 @@ $$;
 ALTER FUNCTION public.fn_manutencao_necessidade_listar_dados_nm(p_codigo_nm integer, p_codigo_empresa integer) OWNER TO postgres;
 
 --
+-- Name: fn_manutencao_necessidade_select_item_ativo(bigint, bigint, bigint, integer); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.fn_manutencao_necessidade_select_item_ativo(p_codigo bigint, p_codigo_ativo_vinculado bigint, p_codigo_necessidade_manutencao bigint, p_codigo_empresa integer) RETURNS TABLE(get_codigo_ativo_item bigint, get_codigo_ativo_vinculado_item bigint, get_codigo_empresa_ativo_item integer, get_codigo_item_estoque bigint, get_quantidade_item numeric, get_valor_unitario_item numeric, get_tipo_item character, get_descricao_item character varying)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        tb_manutencao_necessidade_ativo_item.codigo 					AS get_codigo_ativo_item,
+        tb_manutencao_necessidade_ativo_item.codigo_ativo_vinculado 	AS get_codigo_ativo_vinculado_item,
+        tb_manutencao_necessidade_ativo_item.codigo_empresa 			AS get_codigo_empresa_ativo_item,
+        tb_manutencao_necessidade_ativo_item.codigo_item_estoque 		AS get_codigo_item_estoque,
+        tb_manutencao_necessidade_ativo_item.quantidade 				AS get_quantidade_item,
+        tb_manutencao_necessidade_ativo_item.valor_unitario 			AS get_valor_unitario_item,
+        tb_manutencao_necessidade_ativo_item.tipo 						AS get_tipo_item,
+		tb_cad_item.nome_item											AS get_descricao_item
+    FROM 
+        tb_manutencao_necessidade_ativo_item
+		LEFT JOIN tb_cad_item
+		ON 	tb_cad_item.codigo = tb_manutencao_necessidade_ativo_item.codigo_item_estoque
+		AND	tb_cad_item.codigo_empresa = tb_manutencao_necessidade_ativo_item.codigo_empresa
+    WHERE 
+        tb_manutencao_necessidade_ativo_item.codigo = p_codigo 
+		AND tb_manutencao_necessidade_ativo_item.codigo_ativo_vinculado = p_codigo_ativo_vinculado 
+		AND tb_manutencao_necessidade_ativo_item.codigo_necessidade_manutencao = p_codigo_necessidade_manutencao 
+		AND tb_manutencao_necessidade_ativo_item.codigo_empresa = p_codigo_empresa;
+END;
+$$;
+
+
+ALTER FUNCTION public.fn_manutencao_necessidade_select_item_ativo(p_codigo bigint, p_codigo_ativo_vinculado bigint, p_codigo_necessidade_manutencao bigint, p_codigo_empresa integer) OWNER TO postgres;
+
+--
 -- Name: fn_necessidade_manutencao_load_dados(bigint, integer); Type: FUNCTION; Schema: public; Owner: postgres
 --
 

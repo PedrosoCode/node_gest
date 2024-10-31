@@ -413,6 +413,51 @@ const upsertAtivoNmItem = async (req, res) => {
   }
 };
 
+const carregarDadosItemAtivoNm = async (req, res) => {
+  try {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const decoded = decodeJWT(token);
+
+    if (!decoded) {
+      return res.status(401).send('Token inválido ou expirado');
+    }
+
+    const jwt_codigo_empresa = decoded.codigo_empresa;
+
+    const { body_codigo_ativo_item            ,
+            body_codigo_ativo_vinculado       ,
+            body_codigo_necessidade_manutencao } = req.body;
+
+    const [dadosItemAtivosNM] = await sequelize.query(
+      `SELECT * FROM fn_manutencao_necessidade_select_item_ativo(
+        :p_codigo                          ::BIGINT,
+        :p_codigo_ativo_vinculado          ::BIGINT,
+        :p_codigo_necessidade_manutencao   ::BIGINT,
+        :p_codigo_empresa                  ::INTEGER
+      )`, 
+      {
+        replacements: {
+          p_codigo                        : body_codigo_ativo_item              ,
+          p_codigo_ativo_vinculado        : body_codigo_ativo_vinculado         ,
+          p_codigo_necessidade_manutencao : body_codigo_necessidade_manutencao  ,
+          p_codigo_empresa                : jwt_codigo_empresa                  ,
+        },
+      }
+    );  
+    
+    console.log('dados retornados:', dadosItemAtivosNM);
+
+    if (!dadosItemAtivosNM || dadosItemAtivosNM.length === 0) {
+      return res.status(404).send('Nenhum dado encontrado para essa OS.');
+    }
+
+    res.json(dadosItemAtivosNM); 
+  } catch (err) {
+    console.error('Erro ao listar dadosItemAtivosNM:', err.message);
+    res.status(500).send('Erro no servidor');
+  }
+};
+
 module.exports = {
   novaNM,
   uploadFoto,
@@ -422,5 +467,6 @@ module.exports = {
   carregarDadosNMativos,
   upsertAtivoNm,
   deletarNMativo,
-  upsertAtivoNmItem
+  upsertAtivoNmItem,
+  carregarDadosItemAtivoNm
 };

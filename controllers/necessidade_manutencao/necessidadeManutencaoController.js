@@ -458,6 +458,47 @@ const carregarDadosItemAtivoNm = async (req, res) => {
   }
 };
 
+
+const deletarNMativoItem = async (req, res) => {
+  try {
+    // Decodificar o token JWT para obter o código da empresa
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const decoded = decodeJWT(token);
+
+    if (!decoded) {
+      return res.status(401).send('Token inválido ou expirado');
+    }
+
+    const { body_codigo_nm_ativo_item,
+            body_codigo_ativo_vinculado,
+            body_codigo_nm
+    } = req.body;
+
+    const jwt_codigo_empresa = decoded.codigo_empresa;
+
+    await sequelize.query(`
+      CALL sp_necessidade_manutencao_delete_ativo_item_nm(
+        :p_codigo_ativo_item              ::bigint,
+        :p_codigo_ativo_vinculado         ::bigint,
+        :p_codigo_necessidade_manutencao  ::bigint,
+        :p_codigo_empresa	                ::integer
+      )
+    `, {
+      replacements: {
+        p_codigo_ativo_item               :  body_codigo_nm_ativo_item    ,
+        p_codigo_ativo_vinculado          :  body_codigo_ativo_vinculado  ,
+        p_codigo_necessidade_manutencao   :  body_codigo_nm               ,
+        p_codigo_empresa                  :  jwt_codigo_empresa           ,
+      }
+    });
+
+    res.status(201).send('Operação realizada com sucesso');
+  } catch (err) {
+    console.error('Erro ao realizar delete de ativo:', err.message);
+    res.status(500).send('Erro no servidor');
+  }
+};
+
 module.exports = {
   novaNM,
   uploadFoto,
@@ -468,5 +509,6 @@ module.exports = {
   upsertAtivoNm,
   deletarNMativo,
   upsertAtivoNmItem,
-  carregarDadosItemAtivoNm
+  carregarDadosItemAtivoNm,
+  deletarNMativoItem
 };

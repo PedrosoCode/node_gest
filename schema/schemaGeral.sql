@@ -768,6 +768,25 @@ $$;
 ALTER PROCEDURE public.sp_manutencao_ordem_servico_upsert_item(IN p_codigo_empresa integer, IN p_codigo_os bigint, IN p_codigo_item bigint, IN p_codigo_item_estoque integer, IN p_valor_unitario double precision, IN p_quantidade numeric, IN p_codigo_usuario_ultima_alteracao bigint) OWNER TO postgres;
 
 --
+-- Name: sp_necessidade_manutencao_delete_ativo_item_nm(bigint, bigint, bigint, integer); Type: PROCEDURE; Schema: public; Owner: postgres
+--
+
+CREATE PROCEDURE public.sp_necessidade_manutencao_delete_ativo_item_nm(IN p_codigo_ativo_item bigint, IN p_codigo_ativo_vinculado bigint, IN p_codigo_necessidade_manutencao bigint, IN p_codigo_empresa integer)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    DELETE FROM tb_manutencao_necessidade_ativo_item
+    WHERE 	codigo = p_codigo_ativo_item 
+	AND 	codigo_ativo_vinculado = p_codigo_ativo_vinculado
+	AND 	codigo_necessidade_manutencao = p_codigo_necessidade_manutencao
+    AND 	codigo_empresa = p_codigo_empresa;
+END;
+$$;
+
+
+ALTER PROCEDURE public.sp_necessidade_manutencao_delete_ativo_item_nm(IN p_codigo_ativo_item bigint, IN p_codigo_ativo_vinculado bigint, IN p_codigo_necessidade_manutencao bigint, IN p_codigo_empresa integer) OWNER TO postgres;
+
+--
 -- Name: sp_necessidade_manutencao_delete_ativo_nm(bigint, integer, integer); Type: PROCEDURE; Schema: public; Owner: postgres
 --
 

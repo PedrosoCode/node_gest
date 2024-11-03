@@ -9,7 +9,8 @@ const {
     upsertAtivoNm,
     deletarNMativo,
     upsertAtivoNmItem,
-    carregarDadosItemAtivoNm
+    carregarDadosItemAtivoNm,
+    deletarNMativoItem
 } = require('../../controllers/necessidade_manutencao/necessidadeManutencaoController');
 
 const router = express.Router();
@@ -26,7 +27,9 @@ router.post('/necessidade_manutencao/ativo-upsert', upsertAtivoNm);
 router.get('/necessidade_manutencao/carregarDadosAtivos', carregarDadosNMativos);
 router.delete('/necessidade_manutencao/deletarAtivo', deletarNMativo);
 
-router.post('/necessidade_manutencao/ativo-upsert-item', upsertAtivoNmItem)
-router.get('/necessidade_manutencao/ativo-load-item', carregarDadosItemAtivoNm)
+router.post('/necessidade_manutencao/ativo-upsert-item', upsertAtivoNmItem);
+router.get('/necessidade_manutencao/ativo-load-item', carregarDadosItemAtivoNm);
+router.delete('/necessidade_manutencao/deletar-item-ativo', deletarNMativoItem);
+
 
 module.exports = router;
